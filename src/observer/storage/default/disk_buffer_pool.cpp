@@ -95,7 +95,6 @@ BufferPoolIterator::~BufferPoolIterator()
 {}
 RC BufferPoolIterator::init(DiskBufferPool &bp, PageNum start_page /* = 0 */)
 {
-  bitmap_.init(bp.file_header_->bitmap, bp.file_header_->page_count);
   if (start_page <= 0) {
     current_page_num_ = 0;
   } else {
@@ -171,7 +170,7 @@ RC DiskBufferPool::open_file(const char *file_name)
   }
 
   file_header_ = (BPFileHeader *)hdr_frame_->data();
-  file_header_->usage = new std::map<int, bool>;
+  file_header_->usage = new SimpleLRU<PageNum, bool>();
   LOG_INFO("Successfully open %s. file_desc=%d, hdr_frame=%p", file_name, file_desc_, hdr_frame_);
   return RC::SUCCESS;
 }
@@ -244,20 +243,10 @@ RC DiskBufferPool::allocate_page(Frame **frame)
 {
   RC rc = RC::SUCCESS;
 
-  int byte = 0, bit = 0;
   if ((file_header_->allocated_pages) < (file_header_->page_count)) {
     // There is one free page
     for (int i = 0; i < file_header_->page_count; i++) {
-      // byte = i / 8;
-      // bit = i % 8;
-      // if (((file_header_->bitmap[byte]) & (1 << bit)) == 0) {
-      //   (file_header_->allocated_pages)++;
-      //   file_header_->bitmap[byte] |= (1 << bit);
-      //   // TODO,  do we need clean the loaded page's data?
-	    //   hdr_frame_->mark_dirty();
-      //   return get_this_page(i, frame);
-      // }
-      if (!file_header_->usage->operator[](i)) {
+      if (!file_header_->usage->get(i)) {
         file_header_->allocated_pages++;
         hdr_frame_->mark_dirty();
         return get_this_page(i, frame);
@@ -275,10 +264,7 @@ RC DiskBufferPool::allocate_page(Frame **frame)
   file_header_->allocated_pages++;
   file_header_->page_count++;
 
-  // byte = page_num / 8;
-  // bit = page_num % 8;
-  // file_header_->bitmap[byte] |= (1 << bit);
-  (*(file_header_->usage))[page_num] = true;
+  file_header_->usage->put(page_num,true);
   hdr_frame_->mark_dirty();
 
   allocated_frame->dirty_ = false;
@@ -333,9 +319,7 @@ RC DiskBufferPool::dispose_page(PageNum page_num)
 
   hdr_frame_->dirty_ = true;
   file_header_->allocated_pages--;
-  // char tmp = 1 << (page_num % 8);
-  // file_header_->bitmap[page_num / 8] &= ~tmp;
-  (*(file_header_->usage))[page_num] = false;
+  file_header_->usage->put(page_num, false);
   return RC::SUCCESS;
 }
 
@@ -483,14 +467,10 @@ RC DiskBufferPool::check_page_num(PageNum page_num)
     LOG_ERROR("Invalid pageNum:%d, file's name:%s", page_num, file_name_.c_str());
     return RC::BUFFERPOOL_INVALID_PAGE_NUM;
   }
-  if (file_header_->usage->find(page_num) == file_header_->usage->end()) {
+  if (file_header_->usage->get(page_num) == PageNum()) {
        LOG_ERROR("Invalid pageNum:%d, file's name:%s", page_num, file_name_.c_str());
     return RC::BUFFERPOOL_INVALID_PAGE_NUM; 
   }
-  // if ((file_header_->bitmap[page_num / 8] & (1 << (page_num % 8))) == 0) {
-  //   LOG_ERROR("Invalid pageNum:%d, file's name:%s", page_num, file_name_.c_str());
-  //   return RC::BUFFERPOOL_INVALID_PAGE_NUM;
-  // }
   return RC::SUCCESS;
 }
 
@@ -561,10 +541,10 @@ RC BufferPoolManager::create_file(const char *file_name)
   BPFileHeader *file_header = (BPFileHeader *)page.data;
   file_header->allocated_pages = 1;
   file_header->page_count = 1;
-  file_header->usage = new std::map<int, bool>;
+  file_header->usage = new common::SimpleLRU<PageNum, bool>();
   // char *bitmap = file_header->bitmap;
   // bitmap[0] |= 0x01;
-  (*(file_header->usage))[0] = true;
+  file_header->usage->put(0, true);
   if (lseek(fd, 0, SEEK_SET) == -1) {
     LOG_ERROR("Failed to seek file %s to position 0, due to %s .", file_name, strerror(errno));
     close(fd);
