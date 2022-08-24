@@ -27,7 +27,6 @@ See the Mulan PSL v2 for more details. */
 #include "rc.h"
 #include "defs.h"
 #include "common/mm/mem_pool.h"
-#include "common/lang/bitmap.h"
 #include "common/lang/cache.h"
 
 class BufferPoolManager;
@@ -143,7 +142,7 @@ public:
   PageNum next();
   RC reset();
 private:
-  common::Bitmap   bitmap_;
+  common::Cache<common::SimpleLRU<PageNum, bool>>* pusage;
   PageNum  current_page_num_ = -1;
 };
 
