@@ -37,8 +37,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/seda/timer_stage.h"
 namespace common {
 
-int init_seda(ProcessParam *process_cfg)
-{
+int init_seda(ProcessParam* process_cfg) {
   // Initialize the static data structures of threadpool
   Threadpool::create_pool_key();
 
@@ -48,7 +47,7 @@ int init_seda(ProcessParam *process_cfg)
   static StageFactory seda_stats_factory("MetricsStage", &MetricsStage::make_stage);
 
   // try to parse the seda configuration files
-  SedaConfig *config = SedaConfig::get_instance();
+  SedaConfig* config = SedaConfig::get_instance();
   SedaConfig::status_t config_stat;
 
   config_stat = config->parse();
@@ -75,9 +74,8 @@ int init_seda(ProcessParam *process_cfg)
   return 0;
 }
 
-void cleanup_seda()
-{
-  SedaConfig *seda_config = SedaConfig::get_instance();
+void cleanup_seda() {
+  SedaConfig* seda_config = SedaConfig::get_instance();
   delete seda_config;
   SedaConfig::get_instance() = NULL;
 }

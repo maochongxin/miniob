@@ -23,15 +23,15 @@ namespace common {
 /**
  * Now it blocks SIGINT, SIGTERM, and SIGUSR1
  */
-void blockDefaultSignals(sigset_t *signal_set, sigset_t *old_set);
+void blockDefaultSignals(sigset_t* signal_set, sigset_t* old_set);
 //! Default function that unblocks signals.
 /**
  * It unblocks SIGINT, SIGTERM,and SIGUSR1.
  */
-void unBlockDefaultSignals(sigset_t *signal_set, sigset_t *old_set);
+void unBlockDefaultSignals(sigset_t* signal_set, sigset_t* old_set);
 
-void *waitForSignals(sigset_t *signal_set);
-void startWaitForSignals(sigset_t *signal_set);
+void* waitForSignals(sigset_t* signal_set);
+void startWaitForSignals(sigset_t* signal_set);
 
 // Set signal handling function
 /**

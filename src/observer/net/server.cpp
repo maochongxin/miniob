@@ -39,37 +39,33 @@ using namespace common;
 static const std::string READ_SOCKET_METRIC_TAG = "SessionStage.readsocket";
 static const std::string WRITE_SOCKET_METRIC_TAG = "SessionStage.writesocket";
 
-Stage *Server::session_stage_ = nullptr;
-common::SimpleTimer *Server::read_socket_metric_ = nullptr;
-common::SimpleTimer *Server::write_socket_metric_ = nullptr;
+Stage* Server::session_stage_ = nullptr;
+common::SimpleTimer* Server::read_socket_metric_ = nullptr;
+common::SimpleTimer* Server::write_socket_metric_ = nullptr;
 
-ServerParam::ServerParam()
-{
+ServerParam::ServerParam() {
   listen_addr = INADDR_ANY;
   max_connection_num = MAX_CONNECTION_NUM_DEFAULT;
   port = PORT_DEFAULT;
 }
 
-Server::Server(ServerParam input_server_param) : server_param_(input_server_param)
-{
+Server::Server(ServerParam input_server_param) : server_param_(input_server_param) {
   started_ = false;
   server_socket_ = 0;
   event_base_ = nullptr;
   listen_ev_ = nullptr;
 }
 
-Server::~Server()
-{
+Server::~Server() {
   if (started_) {
     shutdown();
   }
 }
 
-void Server::init()
-{
+void Server::init() {
   session_stage_ = get_seda_config()->get_stage(SESSION_STAGE_NAME);
 
-  MetricsRegistry &metricsRegistry = get_metrics_registry();
+  MetricsRegistry& metricsRegistry = get_metrics_registry();
   if (Server::read_socket_metric_ == nullptr) {
     Server::read_socket_metric_ = new SimpleTimer();
     metricsRegistry.register_metric(READ_SOCKET_METRIC_TAG, Server::read_socket_metric_);
@@ -81,8 +77,7 @@ void Server::init()
   }
 }
 
-int Server::set_non_block(int fd)
-{
+int Server::set_non_block(int fd) {
 
   int flags = fcntl(fd, F_GETFL);
   if (flags == -1) {
@@ -98,8 +93,7 @@ int Server::set_non_block(int fd)
   return 0;
 }
 
-void Server::close_connection(ConnectionContext *client_context)
-{
+void Server::close_connection(ConnectionContext* client_context) {
   LOG_INFO("Close connection of %s.", client_context->addr);
   event_del(&client_context->read_event);
   ::close(client_context->fd);
@@ -108,9 +102,8 @@ void Server::close_connection(ConnectionContext *client_context)
   delete client_context;
 }
 
-void Server::recv(int fd, short ev, void *arg)
-{
-  ConnectionContext *client = (ConnectionContext *)arg;
+void Server::recv(int fd, short ev, void* arg) {
+  ConnectionContext* client = (ConnectionContext*)arg;
   // Server::send(sev->getClient(), sev->getRequestBuf(), strlen(sev->getRequestBuf()));
 
   int data_len = 0;
@@ -173,13 +166,12 @@ void Server::recv(int fd, short ev, void *arg)
   }
 
   LOG_INFO("receive command(size=%d): %s", data_len, client->buf);
-  SessionEvent *sev = new SessionEvent(client);
+  SessionEvent* sev = new SessionEvent(client);
   session_stage_->add_event(sev);
 }
 
 // 这个函数仅负责发送数据，至于是否是一个完整的消息，由调用者控制
-int Server::send(ConnectionContext *client, const char *buf, int data_len)
-{
+int Server::send(ConnectionContext* client, const char* buf, int data_len) {
   if (buf == nullptr || data_len == 0) {
     return 0;
   }
@@ -207,15 +199,14 @@ int Server::send(ConnectionContext *client, const char *buf, int data_len)
   return 0;
 }
 
-void Server::accept(int fd, short ev, void *arg)
-{
-  Server *instance = (Server *)arg;
+void Server::accept(int fd, short ev, void* arg) {
+  Server* instance = (Server*)arg;
   struct sockaddr_in addr;
   socklen_t addrlen = sizeof(addr);
 
   int ret = 0;
 
-  int client_fd = ::accept(fd, (struct sockaddr *)&addr, &addrlen);
+  int client_fd = ::accept(fd, (struct sockaddr*)&addr, &addrlen);
   if (client_fd < 0) {
     LOG_ERROR("Failed to accept client's connection, %s", strerror(errno));
     return;
@@ -249,7 +240,7 @@ void Server::accept(int fd, short ev, void *arg)
     }
   }
 
-  ConnectionContext *client_context = new ConnectionContext();
+  ConnectionContext* client_context = new ConnectionContext();
   memset(client_context, 0, sizeof(ConnectionContext));
   client_context->fd = client_fd;
   snprintf(client_context->addr, sizeof(client_context->addr), "%s", addr_str.c_str());
@@ -278,16 +269,14 @@ void Server::accept(int fd, short ev, void *arg)
   LOG_INFO("Accepted connection from %s\n", client_context->addr);
 }
 
-int Server::start()
-{
+int Server::start() {
   if (server_param_.use_unix_socket) {
     return start_unix_socket_server();
   } else {
     return start_tcp_server();
   }
 }
-int Server::start_tcp_server()
-{
+int Server::start_tcp_server() {
   int ret = 0;
   struct sockaddr_in sa;
 
@@ -317,7 +306,7 @@ int Server::start_tcp_server()
   sa.sin_port = htons(server_param_.port);
   sa.sin_addr.s_addr = htonl(server_param_.listen_addr);
 
-  ret = bind(server_socket_, (struct sockaddr *)&sa, sizeof(sa));
+  ret = bind(server_socket_, (struct sockaddr*)&sa, sizeof(sa));
   if (ret < 0) {
     LOG_ERROR("bind(): can not bind server socket, %s", strerror(errno));
     ::close(server_socket_);
@@ -351,8 +340,7 @@ int Server::start_tcp_server()
   return 0;
 }
 
-int Server::start_unix_socket_server()
-{
+int Server::start_unix_socket_server() {
 
   int ret = 0;
   server_socket_ = socket(PF_UNIX, SOCK_STREAM, 0);
@@ -375,7 +363,7 @@ int Server::start_unix_socket_server()
   sockaddr.sun_family = PF_UNIX;
   snprintf(sockaddr.sun_path, sizeof(sockaddr.sun_path), "%s", server_param_.unix_socket_path.c_str());
 
-  ret = bind(server_socket_, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
+  ret = bind(server_socket_, (struct sockaddr*)&sockaddr, sizeof(sockaddr));
   if (ret < 0) {
     LOG_ERROR("bind(): can not bind server socket(path=%s), %s", sockaddr.sun_path, strerror(errno));
     ::close(server_socket_);
@@ -409,8 +397,7 @@ int Server::start_unix_socket_server()
   return 0;
 }
 
-int Server::serve()
-{
+int Server::serve() {
   event_base_ = event_base_new();
   if (event_base_ == nullptr) {
     LOG_ERROR("Failed to create event base, %s.", strerror(errno));
@@ -428,8 +415,7 @@ int Server::serve()
   return 0;
 }
 
-void Server::shutdown()
-{
+void Server::shutdown() {
   LOG_INFO("Server shutting down");
 
   // cleanup

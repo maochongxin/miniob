@@ -19,7 +19,7 @@ See the Mulan PSL v2 for more details. */
 
 namespace common {
 class TimerSnapshot : public HistogramSnapShot {
-public:
+ public:
   TimerSnapshot();
   virtual ~TimerSnapshot();
 
@@ -28,7 +28,7 @@ public:
 
   std::string to_string();
 
-protected:
+ protected:
   double tps = 1.0;
 };
 }  // namespace common

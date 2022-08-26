@@ -21,11 +21,10 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 namespace common {
 
-Log *g_log = nullptr;
+Log* g_log = nullptr;
 
-Log::Log(const std::string &log_file_name, const LOG_LEVEL log_level, const LOG_LEVEL console_level)
-    : log_name_(log_file_name), log_level_(log_level), console_level_(console_level)
-{
+Log::Log(const std::string& log_file_name, const LOG_LEVEL log_level, const LOG_LEVEL console_level)
+    : log_name_(log_file_name), log_level_(log_level), console_level_(console_level) {
   prefix_map_[LOG_LEVEL_PANIC] = "PANIC:";
   prefix_map_[LOG_LEVEL_ERR] = "ERROR:";
   prefix_map_[LOG_LEVEL_WARN] = "WARNNING:";
@@ -45,8 +44,7 @@ Log::Log(const std::string &log_file_name, const LOG_LEVEL log_level, const LOG_
   check_param_valid();
 }
 
-Log::~Log(void)
-{
+Log::~Log(void) {
   pthread_mutex_lock(&lock_);
   if (ofs_.is_open()) {
     ofs_.close();
@@ -56,8 +54,7 @@ Log::~Log(void)
   pthread_mutex_destroy(&lock_);
 }
 
-void Log::check_param_valid()
-{
+void Log::check_param_valid() {
   assert(!log_name_.empty());
   assert(LOG_LEVEL_PANIC <= log_level_ && log_level_ < LOG_LEVEL_LAST);
   assert(LOG_LEVEL_PANIC <= console_level_ && console_level_ < LOG_LEVEL_LAST);
@@ -65,8 +62,7 @@ void Log::check_param_valid()
   return;
 }
 
-bool Log::check_output(const LOG_LEVEL level, const char *module)
-{
+bool Log::check_output(const LOG_LEVEL level, const char* module) {
   if (LOG_LEVEL_LAST > level && level <= console_level_) {
     return true;
   }
@@ -80,8 +76,7 @@ bool Log::check_output(const LOG_LEVEL level, const char *module)
   return false;
 }
 
-int Log::output(const LOG_LEVEL level, const char *module, const char *prefix, const char *f, ...)
-{
+int Log::output(const LOG_LEVEL level, const char* module, const char* prefix, const char* f, ...) {
   bool locked = false;
   try {
     va_list args;
@@ -119,7 +114,7 @@ int Log::output(const LOG_LEVEL level, const char *module, const char *prefix, c
       locked = false;
     }
 
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     if (locked) {
       pthread_mutex_unlock(&lock_);
     }
@@ -130,8 +125,7 @@ int Log::output(const LOG_LEVEL level, const char *module, const char *prefix, c
   return LOG_STATUS_OK;
 }
 
-int Log::set_console_level(LOG_LEVEL console_level)
-{
+int Log::set_console_level(LOG_LEVEL console_level) {
   if (LOG_LEVEL_PANIC <= console_level && console_level < LOG_LEVEL_LAST) {
     console_level_ = console_level;
     return LOG_STATUS_OK;
@@ -140,13 +134,11 @@ int Log::set_console_level(LOG_LEVEL console_level)
   return LOG_STATUS_ERR;
 }
 
-LOG_LEVEL Log::get_console_level()
-{
+LOG_LEVEL Log::get_console_level() {
   return console_level_;
 }
 
-int Log::set_log_level(LOG_LEVEL log_level)
-{
+int Log::set_log_level(LOG_LEVEL log_level) {
   if (LOG_LEVEL_PANIC <= log_level && log_level < LOG_LEVEL_LAST) {
     log_level_ = log_level;
     return LOG_STATUS_OK;
@@ -155,40 +147,34 @@ int Log::set_log_level(LOG_LEVEL log_level)
   return LOG_STATUS_ERR;
 }
 
-LOG_LEVEL Log::get_log_level()
-{
+LOG_LEVEL Log::get_log_level() {
   return log_level_;
 }
 
-const char *Log::prefix_msg(LOG_LEVEL level)
-{
+const char* Log::prefix_msg(LOG_LEVEL level) {
   if (LOG_LEVEL_PANIC <= level && level < LOG_LEVEL_LAST) {
     return prefix_map_[level].c_str();
   }
-  static const char *empty_prefix = "";
+  static const char* empty_prefix = "";
   return empty_prefix;
 }
 
-void Log::set_default_module(const std::string &modules)
-{
+void Log::set_default_module(const std::string& modules) {
   split_string(modules, ",", default_set_);
 }
 
-int Log::set_rotate_type(LOG_ROTATE rotate_type)
-{
+int Log::set_rotate_type(LOG_ROTATE rotate_type) {
   if (LOG_ROTATE_BYDAY <= rotate_type && rotate_type < LOG_ROTATE_LAST) {
     rotate_type_ = rotate_type;
   }
   return LOG_STATUS_OK;
 }
 
-LOG_ROTATE Log::get_rotate_type()
-{
+LOG_ROTATE Log::get_rotate_type() {
   return rotate_type_;
 }
 
-int Log::rotate_by_day(const int year, const int month, const int day)
-{
+int Log::rotate_by_day(const int year, const int month, const int day) {
   if (log_date_.year_ == year && log_date_.mon_ == month && log_date_.day_ == day) {
     // Don't need rotate
     return 0;
@@ -213,8 +199,7 @@ int Log::rotate_by_day(const int year, const int month, const int day)
   return 0;
 }
 
-int Log::rename_old_logs()
-{
+int Log::rename_old_logs() {
   int log_index = 1;
   int max_log_index = 0;
   char log_index_str[4] = {0};
@@ -252,8 +237,7 @@ int Log::rename_old_logs()
   return LOG_STATUS_OK;
 }
 
-int Log::rotate_by_size()
-{
+int Log::rotate_by_size() {
   if (log_line_ < 0) {
     // The first time open log file
     ofs_.open(log_name_.c_str(), std::ios_base::out | std::ios_base::app);
@@ -296,8 +280,7 @@ int Log::rotate_by_size()
   return LOG_STATUS_OK;
 }
 
-int Log::rotate(const int year, const int month, const int day)
-{
+int Log::rotate(const int year, const int month, const int day) {
   int result = 0;
   pthread_mutex_lock(&lock_);
   if (rotate_type_ == LOG_ROTATE_BYDAY) {
@@ -310,20 +293,17 @@ int Log::rotate(const int year, const int month, const int day)
   return result;
 }
 
-LoggerFactory::LoggerFactory()
-{
+LoggerFactory::LoggerFactory() {
   // Auto-generated constructor stub
 }
 
-LoggerFactory::~LoggerFactory()
-{
+LoggerFactory::~LoggerFactory() {
   // Auto-generated destructor stub
 }
 
 int LoggerFactory::init(
-    const std::string &log_file, Log **logger, LOG_LEVEL log_level, LOG_LEVEL console_level, LOG_ROTATE rotate_type)
-{
-  Log *log = new (std::nothrow) Log(log_file, log_level, console_level);
+    const std::string& log_file, Log** logger, LOG_LEVEL log_level, LOG_LEVEL console_level, LOG_ROTATE rotate_type) {
+  Log* log = new (std::nothrow) Log(log_file, log_level, console_level);
   if (log == nullptr) {
     std::cout << "Error: fail to construct a log object!" << std::endl;
     return -1;
@@ -336,8 +316,7 @@ int LoggerFactory::init(
 }
 
 int LoggerFactory::init_default(
-    const std::string &log_file, LOG_LEVEL log_level, LOG_LEVEL console_level, LOG_ROTATE rotate_type)
-{
+    const std::string& log_file, LOG_LEVEL log_level, LOG_LEVEL console_level, LOG_ROTATE rotate_type) {
   if (g_log != nullptr) {
     LOG_WARN("Default logger has been initialized");
     return 0;

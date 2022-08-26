@@ -22,7 +22,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/seda/stage.h"
 namespace common {
 
-extern bool &get_event_history_flag();
+extern bool& get_event_history_flag();
 
 /**
  * Constructor
@@ -30,15 +30,14 @@ extern bool &get_event_history_flag();
  *
  * @post thread pool has <i>threads</i> threads running
  */
-Threadpool::Threadpool(unsigned int threads, const std::string &name)
+Threadpool::Threadpool(unsigned int threads, const std::string& name)
     : run_queue_(),
       eventhist_(get_event_history_flag()),
       nthreads_(0),
       threads_to_kill_(0),
       n_idles_(0),
       killer_("KillThreads"),
-      name_(name)
-{
+      name_(name) {
   LOG_TRACE("Enter, thread number:%d", threads);
   MUTEX_INIT(&run_mutex_, NULL);
   COND_INIT(&run_cond_, NULL);
@@ -54,8 +53,7 @@ Threadpool::Threadpool(unsigned int threads, const std::string &name)
  *
  * @post all threads are destroyed and pool is destroyed
  */
-Threadpool::~Threadpool()
-{
+Threadpool::~Threadpool() {
   LOG_TRACE("%s", "enter");
   // kill all the remaining service threads
   kill_threads(nthreads_);
@@ -72,8 +70,7 @@ Threadpool::~Threadpool()
  * Query number of threads.
  * @return number of threads in the thread pool.
  */
-unsigned int Threadpool::num_threads()
-{
+unsigned int Threadpool::num_threads() {
   MUTEX_LOCK(&thread_mutex_);
   unsigned int result = nthreads_;
   MUTEX_UNLOCK(&thread_mutex_);
@@ -88,8 +85,7 @@ unsigned int Threadpool::num_threads()
  *        <= threads
  * @return number of thread successfully created
  */
-unsigned int Threadpool::add_threads(unsigned int threads)
-{
+unsigned int Threadpool::add_threads(unsigned int threads) {
   unsigned int i;
   pthread_t pthread;
   pthread_attr_t pthread_attrs;
@@ -102,7 +98,7 @@ unsigned int Threadpool::add_threads(unsigned int threads)
 
   // attempt to start the requested number of threads
   for (i = 0; i < threads; i++) {
-    int stat = pthread_create(&pthread, &pthread_attrs, Threadpool::run_thread, (void *)this);
+    int stat = pthread_create(&pthread, &pthread_attrs, Threadpool::run_thread, (void*)this);
     if (stat != 0) {
       LOG_WARN("Failed to create one thread\n");
       break;
@@ -125,8 +121,7 @@ unsigned int Threadpool::add_threads(unsigned int threads)
  *       <= threads
  * @return number of threads successfully killed.
  */
-unsigned int Threadpool::kill_threads(unsigned int threads)
-{
+unsigned int Threadpool::kill_threads(unsigned int threads) {
   LOG_TRACE("%s%d", "enter - threads to kill", threads);
   MUTEX_LOCK(&thread_mutex_);
 
@@ -165,8 +160,7 @@ unsigned int Threadpool::kill_threads(unsigned int threads)
  * Reduces the count of active threads, and, if this is the last pending
  * kill, signals the waiting kill_threads method.
  */
-void Threadpool::thread_kill()
-{
+void Threadpool::thread_kill() {
   MUTEX_LOCK(&thread_mutex_);
 
   nthreads_--;
@@ -188,8 +182,7 @@ void Threadpool::thread_kill()
  * @pre  to_kill <= current number of threads
  * @return number of kill thread events successfully scheduled
  */
-unsigned int Threadpool::gen_kill_thread_events(unsigned int to_kill)
-{
+unsigned int Threadpool::gen_kill_thread_events(unsigned int to_kill) {
   LOG_TRACE("%s%d", "enter", to_kill);
   assert(MUTEX_TRYLOCK(&thread_mutex_) != 0);
   assert(to_kill <= nthreads_);
@@ -198,7 +191,7 @@ unsigned int Threadpool::gen_kill_thread_events(unsigned int to_kill)
   for (i = 0; i < to_kill; i++) {
 
     // allocate kill thread event and put it on the list...
-    StageEvent *sevent = new StageEvent();
+    StageEvent* sevent = new StageEvent();
     if (sevent == NULL) {
       break;
     }
@@ -217,8 +210,7 @@ unsigned int Threadpool::gen_kill_thread_events(unsigned int to_kill)
  * @pre  stage must have a non-empty queue.
  * @post stage is scheduled on the run queue.
  */
-void Threadpool::schedule(Stage *stage)
-{
+void Threadpool::schedule(Stage* stage) {
   assert(!stage->qempty());
 
   MUTEX_LOCK(&run_mutex_);
@@ -236,8 +228,7 @@ void Threadpool::schedule(Stage *stage)
 }
 
 // Get name of thread pool
-const std::string &Threadpool::get_name()
-{
+const std::string& Threadpool::get_name() {
   return name_;
 }
 
@@ -246,9 +237,8 @@ const std::string &Threadpool::get_name()
  * Function which contains the control loop for each service thread.
  * Should not be called except when a thread is created.
  */
-void *Threadpool::run_thread(void *pool_ptr)
-{
-  Threadpool *pool = (Threadpool *)pool_ptr;
+void* Threadpool::run_thread(void* pool_ptr) {
+  Threadpool* pool = (Threadpool*)pool_ptr;
 
   // save thread pool pointer
   set_thread_pool_ptr(pool);
@@ -270,11 +260,11 @@ void *Threadpool::run_thread(void *pool_ptr)
     }
 
     assert(!pool->run_queue_.empty());
-    Stage *run_stage = *(pool->run_queue_.begin());
+    Stage* run_stage = *(pool->run_queue_.begin());
     pool->run_queue_.pop_front();
     MUTEX_UNLOCK(&(pool->run_mutex_));
 
-    StageEvent *event = run_stage->remove_event();
+    StageEvent* event = run_stage->remove_event();
 
     // need to check if this is a rescheduled callback
     if (event->is_callback()) {
@@ -315,26 +305,22 @@ void *Threadpool::run_thread(void *pool_ptr)
 
 pthread_key_t Threadpool::pool_ptr_key_;
 
-void Threadpool::create_pool_key()
-{
+void Threadpool::create_pool_key() {
   // init the thread specific to store thread pool pointer
   // this is called in main thread, so no pthread_once is needed
   pthread_key_create(&pool_ptr_key_, NULL);
 }
 
-void Threadpool::del_pool_key()
-{
+void Threadpool::del_pool_key() {
   pthread_key_delete(pool_ptr_key_);
 }
 
-void Threadpool::set_thread_pool_ptr(const Threadpool *thd_Pool)
-{
+void Threadpool::set_thread_pool_ptr(const Threadpool* thd_Pool) {
   pthread_setspecific(pool_ptr_key_, thd_Pool);
 }
 
-const Threadpool *Threadpool::get_thread_pool_ptr()
-{
-  return (const Threadpool *)pthread_getspecific(pool_ptr_key_);
+const Threadpool* Threadpool::get_thread_pool_ptr() {
+  return (const Threadpool*)pthread_getspecific(pool_ptr_key_);
 }
 
 }  // namespace common

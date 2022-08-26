@@ -24,10 +24,9 @@ See the Mulan PSL v2 for more details. */
 #include "storage/common/table.h"
 #include "storage/common/condition_filter.h"
 
-static DefaultHandler *default_handler = nullptr;
+static DefaultHandler* default_handler = nullptr;
 
-void DefaultHandler::set_default(DefaultHandler *handler)
-{
+void DefaultHandler::set_default(DefaultHandler* handler) {
   if (default_handler != nullptr && handler != nullptr) {
     LOG_ERROR("default handler is setted");
     abort();
@@ -35,21 +34,18 @@ void DefaultHandler::set_default(DefaultHandler *handler)
   default_handler = handler;
 }
 
-DefaultHandler &DefaultHandler::get_default()
-{
+DefaultHandler& DefaultHandler::get_default() {
   return *default_handler;
 }
 
-DefaultHandler::DefaultHandler()
-{}
+DefaultHandler::DefaultHandler() {
+}
 
-DefaultHandler::~DefaultHandler() noexcept
-{
+DefaultHandler::~DefaultHandler() noexcept {
   destroy();
 }
 
-RC DefaultHandler::init(const char *base_dir)
-{
+RC DefaultHandler::init(const char* base_dir) {
   // 检查目录是否存在，或者创建
   std::string tmp(base_dir);
   tmp += "/db";
@@ -65,18 +61,14 @@ RC DefaultHandler::init(const char *base_dir)
   return RC::SUCCESS;
 }
 
-void DefaultHandler::destroy()
-{
+void DefaultHandler::destroy() {
   sync();
 
-  for (const auto &iter : opened_dbs_) {
-    delete iter.second;
-  }
+  for (const auto& iter : opened_dbs_) { delete iter.second; }
   opened_dbs_.clear();
 }
 
-RC DefaultHandler::create_db(const char *dbname)
-{
+RC DefaultHandler::create_db(const char* dbname) {
   if (nullptr == dbname || common::is_blank(dbname)) {
     LOG_WARN("Invalid db name");
     return RC::INVALID_ARGUMENT;
@@ -96,13 +88,11 @@ RC DefaultHandler::create_db(const char *dbname)
   return RC::SUCCESS;
 }
 
-RC DefaultHandler::drop_db(const char *dbname)
-{
+RC DefaultHandler::drop_db(const char* dbname) {
   return RC::GENERIC_ERROR;
 }
 
-RC DefaultHandler::open_db(const char *dbname)
-{
+RC DefaultHandler::open_db(const char* dbname) {
   if (nullptr == dbname || common::is_blank(dbname)) {
     LOG_WARN("Invalid db name");
     return RC::INVALID_ARGUMENT;
@@ -118,7 +108,7 @@ RC DefaultHandler::open_db(const char *dbname)
   }
 
   // open db
-  Db *db = new Db();
+  Db* db = new Db();
   RC ret = RC::SUCCESS;
   if ((ret = db->init(dbname, dbpath.c_str())) != RC::SUCCESS) {
     LOG_ERROR("Failed to open db: %s. error=%d", dbname, ret);
@@ -127,61 +117,53 @@ RC DefaultHandler::open_db(const char *dbname)
   return RC::SUCCESS;
 }
 
-RC DefaultHandler::close_db(const char *dbname)
-{
+RC DefaultHandler::close_db(const char* dbname) {
   return RC::GENERIC_ERROR;
 }
 
-RC DefaultHandler::execute(const char *sql)
-{
+RC DefaultHandler::execute(const char* sql) {
   return RC::GENERIC_ERROR;
 }
 
 RC DefaultHandler::create_table(
-    const char *dbname, const char *relation_name, int attribute_count, const AttrInfo *attributes)
-{
-  Db *db = find_db(dbname);
+    const char* dbname, const char* relation_name, int attribute_count, const AttrInfo* attributes) {
+  Db* db = find_db(dbname);
   if (db == nullptr) {
     return RC::SCHEMA_DB_NOT_OPENED;
   }
   return db->create_table(relation_name, attribute_count, attributes);
 }
 
-RC DefaultHandler::drop_table(const char *dbname, const char *relation_name)
-{
+RC DefaultHandler::drop_table(const char* dbname, const char* relation_name) {
   return RC::GENERIC_ERROR;
 }
 
 RC DefaultHandler::create_index(
-    Trx *trx, const char *dbname, const char *relation_name, const char *index_name, const char *attribute_name)
-{
-  Table *table = find_table(dbname, relation_name);
+    Trx* trx, const char* dbname, const char* relation_name, const char* index_name, const char* attribute_name) {
+  Table* table = find_table(dbname, relation_name);
   if (nullptr == table) {
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
   return table->create_index(trx, index_name, attribute_name);
 }
 
-RC DefaultHandler::drop_index(Trx *trx, const char *dbname, const char *relation_name, const char *index_name)
-{
+RC DefaultHandler::drop_index(Trx* trx, const char* dbname, const char* relation_name, const char* index_name) {
 
   return RC::GENERIC_ERROR;
 }
 
 RC DefaultHandler::insert_record(
-    Trx *trx, const char *dbname, const char *relation_name, int value_num, const Value *values)
-{
-  Table *table = find_table(dbname, relation_name);
+    Trx* trx, const char* dbname, const char* relation_name, int value_num, const Value* values) {
+  Table* table = find_table(dbname, relation_name);
   if (nullptr == table) {
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
 
   return table->insert_record(trx, value_num, values);
 }
-RC DefaultHandler::delete_record(Trx *trx, const char *dbname, const char *relation_name, int condition_num,
-    const Condition *conditions, int *deleted_count)
-{
-  Table *table = find_table(dbname, relation_name);
+RC DefaultHandler::delete_record(Trx* trx, const char* dbname, const char* relation_name, int condition_num,
+    const Condition* conditions, int* deleted_count) {
+  Table* table = find_table(dbname, relation_name);
   if (nullptr == table) {
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
@@ -194,10 +176,9 @@ RC DefaultHandler::delete_record(Trx *trx, const char *dbname, const char *relat
   return table->delete_record(trx, &condition_filter, deleted_count);
 }
 
-RC DefaultHandler::update_record(Trx *trx, const char *dbname, const char *relation_name, const char *attribute_name,
-    const Value *value, int condition_num, const Condition *conditions, int *updated_count)
-{
-  Table *table = find_table(dbname, relation_name);
+RC DefaultHandler::update_record(Trx* trx, const char* dbname, const char* relation_name, const char* attribute_name,
+    const Value* value, int condition_num, const Condition* conditions, int* updated_count) {
+  Table* table = find_table(dbname, relation_name);
   if (nullptr == table) {
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
@@ -205,22 +186,20 @@ RC DefaultHandler::update_record(Trx *trx, const char *dbname, const char *relat
   return table->update_record(trx, attribute_name, value, condition_num, conditions, updated_count);
 }
 
-Db *DefaultHandler::find_db(const char *dbname) const
-{
-  std::map<std::string, Db *>::const_iterator iter = opened_dbs_.find(dbname);
+Db* DefaultHandler::find_db(const char* dbname) const {
+  std::map<std::string, Db*>::const_iterator iter = opened_dbs_.find(dbname);
   if (iter == opened_dbs_.end()) {
     return nullptr;
   }
   return iter->second;
 }
 
-Table *DefaultHandler::find_table(const char *dbname, const char *table_name) const
-{
+Table* DefaultHandler::find_table(const char* dbname, const char* table_name) const {
   if (dbname == nullptr || table_name == nullptr) {
     LOG_WARN("Invalid argument. dbname=%p, table_name=%p", dbname, table_name);
     return nullptr;
   }
-  Db *db = find_db(dbname);
+  Db* db = find_db(dbname);
   if (nullptr == db) {
     return nullptr;
   }
@@ -228,11 +207,10 @@ Table *DefaultHandler::find_table(const char *dbname, const char *table_name) co
   return db->find_table(table_name);
 }
 
-RC DefaultHandler::sync()
-{
+RC DefaultHandler::sync() {
   RC rc = RC::SUCCESS;
-  for (const auto &db_pair : opened_dbs_) {
-    Db *db = db_pair.second;
+  for (const auto& db_pair : opened_dbs_) {
+    Db* db = db_pair.second;
     rc = db->sync();
     if (rc != RC::SUCCESS) {
       LOG_ERROR("Failed to sync db. name=%s, rc=%d:%s", db->name(), rc, strrc(rc));

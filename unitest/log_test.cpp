@@ -20,18 +20,15 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-LogTest::LogTest()
-{
+LogTest::LogTest() {
   // Auto-generated constructor stub
 }
 
-LogTest::~LogTest()
-{
+LogTest::~LogTest() {
   // Auto-generated destructor stub
 }
 
-int LogTest::init(const std::string &logFile)
-{
+int LogTest::init(const std::string& logFile) {
 
   LoggerFactory::init_default(logFile);
 
@@ -40,9 +37,8 @@ int LogTest::init(const std::string &logFile)
   return 0;
 }
 
-void *LogTest::log_loop(void *param)
-{
-  int index = *(int *)param;
+void* LogTest::log_loop(void* param) {
+  int index = *(int*)param;
   int i = 0;
   while (i < 100) {
     i++;
@@ -52,8 +48,7 @@ void *LogTest::log_loop(void *param)
   return NULL;
 }
 
-void checkRotate()
-{
+void checkRotate() {
   LogTest test;
 
   test.init();
@@ -63,13 +58,11 @@ void checkRotate()
   test.log_loop(&index);
 }
 
-TEST(checkRotateTest, CheckRoateTest)
-{
+TEST(checkRotateTest, CheckRoateTest) {
   checkRotate();
 }
 
-void testEnableTest()
-{
+void testEnableTest() {
   LogTest test;
 
   test.init();
@@ -93,13 +86,11 @@ void testEnableTest()
   ASSERT_EQ(g_log->check_output(LOG_LEVEL_LAST, __FILE__), true);
 }
 
-TEST(testEnableTest, CheckEnableTest)
-{
+TEST(testEnableTest, CheckEnableTest) {
   testEnableTest();
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
 
   // 分析gtest程序的命令行参数
   testing::InitGoogleTest(&argc, argv);

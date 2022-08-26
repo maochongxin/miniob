@@ -19,18 +19,17 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-TEST(test_mem_pool_item, test_mem_pool_item_basic)
-{
+TEST(test_mem_pool_item, test_mem_pool_item_basic) {
   MemPoolItem mem_pool_item("test");
 
   const int item_num_per_pool = 128;
   mem_pool_item.init(32, true, 1, item_num_per_pool);
-  std::list<void *> used_list;
+  std::list<void*> used_list;
 
   int alloc_num = 1000;
 
   for (int i = 0; i < alloc_num; i++) {
-    void *item = mem_pool_item.alloc();
+    void* item = mem_pool_item.alloc();
     used_list.push_back(item);
   }
 
@@ -47,7 +46,7 @@ TEST(test_mem_pool_item, test_mem_pool_item_basic)
     auto item = used_list.front();
     used_list.pop_front();
 
-    char *check = (char *)item + 10;
+    char* check = (char*)item + 10;
     mem_pool_item.free(item);
     mem_pool_item.free(check);
   }
@@ -57,8 +56,7 @@ TEST(test_mem_pool_item, test_mem_pool_item_basic)
   ASSERT_EQ(pool_size, mem_pool_item.get_size());
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
 
   // 分析gtest程序的命令行参数
   testing::InitGoogleTest(&argc, argv);

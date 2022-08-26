@@ -22,8 +22,7 @@ See the Mulan PSL v2 for more details. */
 #include <string>
 namespace common {
 
-DateTime::DateTime(std::string &xml_str)
-{
+DateTime::DateTime(std::string& xml_str) {
   tm tmp;
   sscanf(xml_str.c_str(),
       "%04d-%02d-%02dT%02d:%02d:%02dZ",
@@ -37,8 +36,7 @@ DateTime::DateTime(std::string &xml_str)
   m_time = make_hms(tmp.tm_hour, tmp.tm_min, tmp.tm_sec, 0);
 }
 
-time_t DateTime::str_to_time_t(std::string &xml_str)
-{
+time_t DateTime::str_to_time_t(std::string& xml_str) {
   tm tmp;
   sscanf(xml_str.c_str(),
       "%04d-%02d-%02dT%02d:%02d:%02dZ",
@@ -53,19 +51,17 @@ time_t DateTime::str_to_time_t(std::string &xml_str)
   return to_time_t();
 }
 
-std::string DateTime::time_t_to_str(int timet)
-{
+std::string DateTime::time_t_to_str(int timet) {
   std::ostringstream oss;
   oss << std::dec << std::setw(10) << timet;
   return oss.str();
 }
 
-std::string DateTime::time_t_to_xml_str(time_t timet)
-{
+std::string DateTime::time_t_to_xml_str(time_t timet) {
   std::string ret_val;
   std::ostringstream oss;
   struct tm tmbuf;
-  tm *tm_info = gmtime_r(&timet, &tmbuf);
+  tm* tm_info = gmtime_r(&timet, &tmbuf);
   oss << tm_info->tm_year + 1900 << "-";
   if ((tm_info->tm_mon + 1) <= 9)
     oss << "0";
@@ -86,8 +82,7 @@ std::string DateTime::time_t_to_xml_str(time_t timet)
   return ret_val;
 }
 
-std::string DateTime::str_to_time_t_str(std::string &xml_str)
-{
+std::string DateTime::str_to_time_t_str(std::string& xml_str) {
   tm tmp;
   std::ostringstream oss;
   sscanf(xml_str.c_str(),
@@ -105,24 +100,21 @@ std::string DateTime::str_to_time_t_str(std::string &xml_str)
   return oss.str();
 }
 
-time_t DateTime::nowtimet()
-{
+time_t DateTime::nowtimet() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return tv.tv_sec;
   ;
 }
 
-DateTime DateTime::now()
-{
+DateTime DateTime::now() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return from_time_t(tv.tv_sec, tv.tv_usec / 1000);
 }
 
 //! Return date and time as a string in Xml Schema date-time format
-std::string DateTime::to_xml_date_time()
-{
+std::string DateTime::to_xml_date_time() {
 
   std::string ret_val;
   tm tm_info;
@@ -149,14 +141,12 @@ std::string DateTime::to_xml_date_time()
   return ret_val;
 }
 
-time_t DateTime::add_duration(std::string xml_duration)
-{
+time_t DateTime::add_duration(std::string xml_duration) {
   add_duration_date_time(xml_duration);
   return to_time_t();
 }
 
-void DateTime::add_duration_date_time(std::string xml_duration)
-{
+void DateTime::add_duration_date_time(std::string xml_duration) {
   // start datetime values
   int s_year, s_month, s_day;
   int s_hour, s_min, s_sec, s_millis = 0;
@@ -229,8 +219,7 @@ void DateTime::add_duration_date_time(std::string xml_duration)
   return;
 }
 
-int DateTime::max_day_in_month_for(int yr, int month)
-{
+int DateTime::max_day_in_month_for(int yr, int month) {
   int tmp_month = ((month - 1) % 12) + 1;
   int tmp_year = yr + ((tmp_month - 1) / 12);
 
@@ -249,8 +238,7 @@ int DateTime::max_day_in_month_for(int yr, int month)
   }
 }
 
-void DateTime::parse_duration(std::string dur_str, struct tm &tm_t)
-{
+void DateTime::parse_duration(std::string dur_str, struct tm& tm_t) {
   std::string::size_type index = 0;
   bzero(&tm_t, sizeof(tm_t));
   if (dur_str[index] != 'P') {
@@ -342,8 +330,7 @@ void DateTime::parse_duration(std::string dur_str, struct tm &tm_t)
 // generate OBJ_ID_TIMESTMP_DIGITS types unique timestamp string
 // caller doesn't need get any lock
 #define OBJ_ID_TIMESTMP_DIGITS 14
-std::string Now::unique()
-{
+std::string Now::unique() {
   struct timeval tv;
   u64_t temp;
   static u64_t last_unique = 0;
@@ -376,14 +363,13 @@ std::string Now::unique()
   return oss.str();
 }
 
-bool DateTime::is_valid_xml_datetime(const std::string &str)
-{
+bool DateTime::is_valid_xml_datetime(const std::string& str) {
   // check length. 20 is the length of a xml date
   if (str.length() != 20)
     return false;
 
   // check each character is correct
-  const char *const flag = "0000-00-00T00:00:00Z";
+  const char* const flag = "0000-00-00T00:00:00Z";
   for (unsigned int i = 0; i < str.length(); ++i) {
     if (flag[i] == '0') {
       if (!isdigit(str[i]))

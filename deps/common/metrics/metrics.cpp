@@ -16,8 +16,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/mutex.h"
 
 namespace common {
-Meter::Meter()
-{
+Meter::Meter() {
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
 
@@ -25,26 +24,22 @@ Meter::Meter()
   value_.store(0l);
 }
 
-Meter::~Meter()
-{
+Meter::~Meter() {
   if (snapshot_value_ != NULL) {
     delete snapshot_value_;
     snapshot_value_ = NULL;
   }
 }
 
-void Meter::inc(long increase)
-{
+void Meter::inc(long increase) {
   value_.fetch_add(increase);
 }
 
-void Meter::inc()
-{
+void Meter::inc() {
   inc(1l);
 }
 
-void Meter::snapshot()
-{
+void Meter::snapshot() {
   // lock here
 
   struct timeval now;
@@ -58,30 +53,26 @@ void Meter::snapshot()
   if (snapshot_value_ == NULL) {
     snapshot_value_ = new SnapshotBasic<double>();
   }
-  ((SnapshotBasic<double> *)snapshot_value_)->setValue(temp_value);
+  ((SnapshotBasic<double>*)snapshot_value_)->setValue(temp_value);
 }
 
-SimpleTimer::~SimpleTimer()
-{
+SimpleTimer::~SimpleTimer() {
   if (snapshot_value_ != NULL) {
     delete snapshot_value_;
     snapshot_value_ = NULL;
   }
 }
 
-void SimpleTimer::inc(long increase)
-{
+void SimpleTimer::inc(long increase) {
   value_.fetch_add(increase);
   times_.fetch_add(1);
 }
 
-void SimpleTimer::update(long one)
-{
+void SimpleTimer::update(long one) {
   inc(one);
 }
 
-void SimpleTimer::snapshot()
-{
+void SimpleTimer::snapshot() {
 
   // lock here
   struct timeval now;
@@ -105,25 +96,23 @@ void SimpleTimer::snapshot()
   if (snapshot_value_ == NULL) {
     snapshot_value_ = new SimplerTimerSnapshot();
   }
-  ((SimplerTimerSnapshot *)snapshot_value_)->setValue(mean, tps);
+  ((SimplerTimerSnapshot*)snapshot_value_)->setValue(mean, tps);
 }
 
-Histogram::Histogram(RandomGenerator &random) : UniformReservoir(random)
-{}
+Histogram::Histogram(RandomGenerator& random) : UniformReservoir(random) {
+}
 
-Histogram::Histogram(RandomGenerator &random, size_t size) : UniformReservoir(random, size)
-{}
+Histogram::Histogram(RandomGenerator& random, size_t size) : UniformReservoir(random, size) {
+}
 
-Histogram::~Histogram()
-{}
+Histogram::~Histogram() {
+}
 
-void Histogram::snapshot()
-{
+void Histogram::snapshot() {
   UniformReservoir::snapshot();
 }
 
-Timer::Timer(RandomGenerator &random) : UniformReservoir(random)
-{
+Timer::Timer(RandomGenerator& random) : UniformReservoir(random) {
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
 
@@ -131,8 +120,7 @@ Timer::Timer(RandomGenerator &random) : UniformReservoir(random)
   value_.store(0l);
 }
 
-Timer::Timer(RandomGenerator &random, size_t size) : UniformReservoir(random, size)
-{
+Timer::Timer(RandomGenerator& random, size_t size) : UniformReservoir(random, size) {
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
 
@@ -140,26 +128,23 @@ Timer::Timer(RandomGenerator &random, size_t size) : UniformReservoir(random, si
   value_.store(0l);
 }
 
-Timer::~Timer()
-{
+Timer::~Timer() {
   if (snapshot_value_ == NULL) {
     delete snapshot_value_;
     snapshot_value_ = NULL;
   }
 }
 
-void Timer::update(double ms)
-{
+void Timer::update(double ms) {
   UniformReservoir::update(ms);
   value_.fetch_add(1l);
 }
 
-void Timer::snapshot()
-{
+void Timer::snapshot() {
   if (snapshot_value_ == NULL) {
     snapshot_value_ = new TimerSnapshot();
   }
-  TimerSnapshot *timer_snapshot = (TimerSnapshot *)snapshot_value_;
+  TimerSnapshot* timer_snapshot = (TimerSnapshot*)snapshot_value_;
 
   struct timeval now;
   gettimeofday(&now, NULL);
@@ -177,14 +162,12 @@ void Timer::snapshot()
   timer_snapshot->set_tps(tps);
 }
 
-TimerStat::TimerStat(SimpleTimer &other_st) : st_(other_st), start_tick_(0), end_tick_(0)
-{
+TimerStat::TimerStat(SimpleTimer& other_st) : st_(other_st), start_tick_(0), end_tick_(0) {
 
   start();
 }
 
-TimerStat::~TimerStat()
-{
+TimerStat::~TimerStat() {
   if (end_tick_ == 0) {
     end();
   }
@@ -192,16 +175,14 @@ TimerStat::~TimerStat()
   st_.update((end_tick_ - start_tick_) / 1000);
 }
 
-void TimerStat::start()
-{
+void TimerStat::start() {
   struct timeval now;
   gettimeofday(&now, NULL);
 
   start_tick_ = now.tv_sec * 1000000 + now.tv_usec;
 }
 
-void TimerStat::end()
-{
+void TimerStat::end() {
   struct timeval now;
   gettimeofday(&now, NULL);
 

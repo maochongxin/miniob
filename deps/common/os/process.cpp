@@ -35,15 +35,14 @@ namespace common {
 
 #define RWRR (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
-std::string get_process_name(const char *prog_name)
-{
+std::string get_process_name(const char* prog_name) {
   std::string process_name;
 
   int buf_len = strlen(prog_name);
 
   assert(buf_len);
 
-  char *buf = new char[buf_len + 1];
+  char* buf = new char[buf_len + 1];
   if (buf == NULL) {
     std::cerr << "Failed to alloc memory for program name." << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
     return "";
@@ -59,8 +58,7 @@ std::string get_process_name(const char *prog_name)
 
 // Background the process by detaching it from the console and redirecting
 // std in, out, and err to /dev/null
-int daemonize_service(bool close_std_streams)
-{
+int daemonize_service(bool close_std_streams) {
   int nochdir = 1;
   int noclose = close_std_streams ? 0 : 1;
   int rc = daemon(nochdir, noclose);
@@ -71,8 +69,7 @@ int daemonize_service(bool close_std_streams)
   return rc;
 }
 
-int daemonize_service(const char *std_out_file, const char *std_err_file)
-{
+int daemonize_service(const char* std_out_file, const char* std_err_file) {
   int rc = daemonize_service(false);
 
   if (rc != 0) {
@@ -85,8 +82,7 @@ int daemonize_service(const char *std_out_file, const char *std_err_file)
   return 0;
 }
 
-void sys_log_redirect(const char *std_out_file, const char *std_err_file)
-{
+void sys_log_redirect(const char* std_out_file, const char* std_err_file) {
   int rc = 0;
 
   // Redirect stdin to /dev/null

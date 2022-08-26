@@ -42,7 +42,7 @@ class Stage;
  */
 class Threadpool {
 
-public:
+ public:
   // Initialize the static data structures of ThreadPool
   static void create_pool_key();
 
@@ -56,7 +56,7 @@ public:
    *
    * @post thread pool has <i>threads</i> threads running
    */
-  Threadpool(unsigned int threads, const std::string &name = std::string());
+  Threadpool(unsigned int threads, const std::string& name = std::string());
 
   /**
    * Destructor
@@ -104,12 +104,12 @@ public:
    * @pre  stage must have a non-empty queue.
    * @post stage is scheduled on the run queue.
    */
-  void schedule(Stage *stage);
+  void schedule(Stage* stage);
 
   // Get name of thread pool
-  const std::string &get_name();
+  const std::string& get_name();
 
-protected:
+ protected:
   /**
    * Internal thread kill.
    * Internal operation called only when a thread kill event is processed.
@@ -129,25 +129,25 @@ protected:
    */
   unsigned int gen_kill_thread_events(unsigned int to_kill);
 
-private:
+ private:
   /**
    * Internal thread control function
    * Function which contains the control loop for each service thread.
    * Should not be called except when a thread is created.
    */
-  static void *run_thread(void *pool_ptr);
+  static void* run_thread(void* pool_ptr);
 
   // Save the thread pool pointer for this thread
-  static void set_thread_pool_ptr(const Threadpool *thd_pool);
+  static void set_thread_pool_ptr(const Threadpool* thd_pool);
 
   // Get the thread pool pointer for this thread
-  static const Threadpool *get_thread_pool_ptr();
+  static const Threadpool* get_thread_pool_ptr();
 
   // run queue state
-  pthread_mutex_t run_mutex_;      //< protects the run queue
-  pthread_cond_t run_cond_;        //< wait here for stage to be scheduled
-  std::deque<Stage *> run_queue_;  //< list of stages with work to do
-  bool eventhist_;                 //< is event history enabled?
+  pthread_mutex_t run_mutex_;     //< protects the run queue
+  pthread_cond_t run_cond_;       //< wait here for stage to be scheduled
+  std::deque<Stage*> run_queue_;  //< list of stages with work to do
+  bool eventhist_;                //< is event history enabled?
 
   // thread state
   pthread_mutex_t thread_mutex_;  //< protects thread state

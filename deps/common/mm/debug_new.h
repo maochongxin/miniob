@@ -21,13 +21,13 @@ namespace common {
 
 /* Prototypes */
 bool check_leaks();
-void *operator new(size_t size, const char *file, int line);
-void *operator new[](size_t size, const char *file, int line);
+void* operator new(size_t size, const char* file, int line);
+void* operator new[](size_t size, const char* file, int line);
 #ifndef NO_PLACEMENT_DELETE
-void operator delete(void *pointer, const char *file, int line);
-void operator delete[](void *pointer, const char *file, int line);
-#endif                           // NO_PLACEMENT_DELETE
-void operator delete[](void *);  // MSVC 6 requires this declaration
+void operator delete(void* pointer, const char* file, int line);
+void operator delete[](void* pointer, const char* file, int line);
+#endif                          // NO_PLACEMENT_DELETE
+void operator delete[](void*);  // MSVC 6 requires this declaration
 
 /* Macros */
 #ifndef DEBUG_NEW_NO_NEW_REDEFINITION
@@ -39,8 +39,8 @@ void operator delete[](void *);  // MSVC 6 requires this declaration
 #endif  // DEBUG_NEW_NO_NEW_REDEFINITION
 #ifdef DEBUG_NEW_EMULATE_MALLOC
 
-#define malloc(s) ((void *)(debug_new char[s]))
-#define free(p) delete[](char *)(p)
+#define malloc(s) ((void*)(debug_new char[s]))
+#define free(p) delete[](char*)(p)
 #endif  // DEBUG_NEW_EMULATE_MALLOC
 
 /* Control flags */

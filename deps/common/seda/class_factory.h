@@ -44,8 +44,8 @@ namespace common {
 template <class T>
 class ClassFactory {
 
-public:
-  typedef T *(*FactoryFunc)(const std::string &);
+ public:
+  typedef T* (*FactoryFunc)(const std::string&);
 
   /**
    * Constructor
@@ -54,7 +54,7 @@ public:
    *
    * @post (tag,func) pair is entered into global factory list
    */
-  ClassFactory(const std::string &tag, FactoryFunc func);
+  ClassFactory(const std::string& tag, FactoryFunc func);
 
   // Destructor
   ~ClassFactory();
@@ -66,15 +66,15 @@ public:
    *
    * @return a reference to the desired instance
    */
-  static T *make_instance(const std::string &tag);
+  static T* make_instance(const std::string& tag);
 
-private:
+ private:
   // Accessor function that gets the head of the factory list
-  static ClassFactory<T> *&fact_list_head();
+  static ClassFactory<T>*& fact_list_head();
 
   std::string identifier_;  // identifier for this factory
   FactoryFunc fact_func_;   // factory function for this class
-  ClassFactory<T> *next_;   // next factory in global list
+  ClassFactory<T>* next_;   // next factory in global list
 };
 
 /**
@@ -88,9 +88,8 @@ private:
  * invoked (from anywhere) the static local will be initialized.
  */
 template <class T>
-ClassFactory<T> *&ClassFactory<T>::fact_list_head()
-{
-  static ClassFactory<T> *fact_list = NULL;
+ClassFactory<T>*& ClassFactory<T>::fact_list_head() {
+  static ClassFactory<T>* fact_list = NULL;
   return fact_list;
 }
 
@@ -100,16 +99,15 @@ ClassFactory<T> *&ClassFactory<T>::fact_list_head()
  * constructor places current instance on the global factory list.
  */
 template <class T>
-ClassFactory<T>::ClassFactory(const std::string &tag, FactoryFunc func) : identifier_(tag), fact_func_(func)
-{
+ClassFactory<T>::ClassFactory(const std::string& tag, FactoryFunc func) : identifier_(tag), fact_func_(func) {
   next_ = fact_list_head();
   fact_list_head() = this;
 }
 
 // Destructor
 template <class T>
-ClassFactory<T>::~ClassFactory()
-{}
+ClassFactory<T>::~ClassFactory() {
+}
 
 /**
  * Construct an instance of a specified sub-class
@@ -118,15 +116,12 @@ ClassFactory<T>::~ClassFactory()
  * create an instance.
  */
 template <class T>
-T *ClassFactory<T>::make_instance(const std::string &tag)
-{
-  T *instance = NULL;
-  ClassFactory<T> *current = fact_list_head();
+T* ClassFactory<T>::make_instance(const std::string& tag) {
+  T* instance = NULL;
+  ClassFactory<T>* current = fact_list_head();
 
   // search the global factory list for a match
-  while ((current != NULL) && (tag != current->identifier_)) {
-    current = current->next_;
-  }
+  while ((current != NULL) && (tag != current->identifier_)) { current = current->next_; }
 
   // if we have a match, create and return an instance
   if (current != NULL) {

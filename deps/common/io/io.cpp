@@ -27,9 +27,8 @@ See the Mulan PSL v2 for more details. */
 
 namespace common {
 
-int readFromFile(const std::string &fileName, char *&outputData, size_t &fileSize)
-{
-  FILE *file = fopen(fileName.c_str(), "rb");
+int readFromFile(const std::string& fileName, char*& outputData, size_t& fileSize) {
+  FILE* file = fopen(fileName.c_str(), "rb");
   if (file == NULL) {
     std::cerr << "Failed to open file " << fileName << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
     return -1;
@@ -43,7 +42,7 @@ int readFromFile(const std::string &fileName, char *&outputData, size_t &fileSiz
   size_t readSize = 0;
   size_t oneRead = 0;
 
-  char *data = NULL;
+  char* data = NULL;
   do {
     memset(buffer, 0, sizeof(buffer));
     oneRead = fread(buffer, 1, sizeof(buffer), file);
@@ -57,7 +56,7 @@ int readFromFile(const std::string &fileName, char *&outputData, size_t &fileSiz
       return -1;
     }
 
-    data = (char *)lrealloc(data, readSize + oneRead);
+    data = (char*)lrealloc(data, readSize + oneRead);
     if (data == NULL) {
       std::cerr << "Failed to alloc memory for " << fileName << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
       lfree(data);
@@ -77,16 +76,15 @@ int readFromFile(const std::string &fileName, char *&outputData, size_t &fileSiz
   return 0;
 }
 
-int writeToFile(const std::string &fileName, const char *data, u32_t dataSize, const char *openMode)
-{
-  FILE *file = fopen(fileName.c_str(), openMode);
+int writeToFile(const std::string& fileName, const char* data, u32_t dataSize, const char* openMode) {
+  FILE* file = fopen(fileName.c_str(), openMode);
   if (file == NULL) {
     std::cerr << "Failed to open file " << fileName << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
     return -1;
   }
 
   u32_t leftSize = dataSize;
-  const char *buffer = data;
+  const char* buffer = data;
   while (leftSize > 0) {
     int writeCount = fwrite(buffer, 1, leftSize, file);
     if (writeCount <= 0) {
@@ -104,8 +102,7 @@ int writeToFile(const std::string &fileName, const char *data, u32_t dataSize, c
   return 0;
 }
 
-int getFileLines(const std::string &fileName, u64_t &lineNum)
-{
+int getFileLines(const std::string& fileName, u64_t& lineNum) {
   lineNum = 0;
 
   char line[4 * ONE_KILO] = {0};
@@ -118,7 +115,7 @@ int getFileLines(const std::string &fileName, u64_t &lineNum)
   while (ifs.good()) {
     line[0] = 0;
     ifs.getline(line, sizeof(line));
-    char *lineStrip = strip(line);
+    char* lineStrip = strip(line);
     if (strlen(lineStrip)) {
       lineNum++;
     }
@@ -128,10 +125,9 @@ int getFileLines(const std::string &fileName, u64_t &lineNum)
   return 0;
 }
 
-int getFileNum(u64_t &fileNum, const std::string &path, const std::string &pattern, bool recursive)
-{
+int getFileNum(u64_t& fileNum, const std::string& path, const std::string& pattern, bool recursive) {
   try {
-    DIR *dirp = NULL;
+    DIR* dirp = NULL;
     dirp = opendir(path.c_str());
     if (dirp == NULL) {
       std::cerr << "Failed to opendir " << path << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
@@ -139,7 +135,7 @@ int getFileNum(u64_t &fileNum, const std::string &path, const std::string &patte
     }
 
     std::string fullPath;
-    struct dirent *entry = NULL;
+    struct dirent* entry = NULL;
     struct stat fs;
     while ((entry = readdir(dirp)) != NULL) {
       // don't care ".", "..", ".****" hidden files
@@ -191,10 +187,10 @@ int getFileNum(u64_t &fileNum, const std::string &path, const std::string &patte
   return -1;
 }
 
-int getFileList(std::vector<std::string> &fileList, const std::string &path, const std::string &pattern, bool recursive)
-{
+int getFileList(
+    std::vector<std::string>& fileList, const std::string& path, const std::string& pattern, bool recursive) {
   try {
-    DIR *dirp = NULL;
+    DIR* dirp = NULL;
     dirp = opendir(path.c_str());
     if (dirp == NULL) {
       std::cerr << "Failed to opendir " << path << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
@@ -202,7 +198,7 @@ int getFileList(std::vector<std::string> &fileList, const std::string &path, con
     }
 
     std::string fullPath;
-    struct dirent *entry = NULL;
+    struct dirent* entry = NULL;
     struct stat fs;
     while ((entry = readdir(dirp)) != NULL) {
       // don't care ".", "..", ".****" hidden files
@@ -253,10 +249,9 @@ int getFileList(std::vector<std::string> &fileList, const std::string &path, con
   return -1;
 }
 
-int getDirList(std::vector<std::string> &dirList, const std::string &path, const std::string &pattern)
-{
+int getDirList(std::vector<std::string>& dirList, const std::string& path, const std::string& pattern) {
   try {
-    DIR *dirp = NULL;
+    DIR* dirp = NULL;
     dirp = opendir(path.c_str());
     if (dirp == NULL) {
       std::cerr << "Failed to opendir " << path << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
@@ -264,7 +259,7 @@ int getDirList(std::vector<std::string> &dirList, const std::string &path, const
     }
 
     std::string fullPath;
-    struct dirent *entry = NULL;
+    struct dirent* entry = NULL;
     struct stat fs;
     while ((entry = readdir(dirp)) != NULL) {
       // don't care ".", "..", ".****" hidden files
@@ -303,8 +298,7 @@ int getDirList(std::vector<std::string> &dirList, const std::string &path, const
   return -1;
 }
 
-int touch(const std::string &path)
-{
+int touch(const std::string& path) {
   // CWE367: A check occurs on a file's attributes before
   // the file is used in a privileged operation, but things
   // may have changed
@@ -317,7 +311,7 @@ int touch(const std::string &path)
   // }
 
   // create the file
-  FILE *file = fopen(path.c_str(), "a");
+  FILE* file = fopen(path.c_str(), "a");
   if (file == NULL) {
     return -1;
   }
@@ -325,8 +319,7 @@ int touch(const std::string &path)
   return 0;
 }
 
-int getFileSize(const char *filePath, u64_t &fileLen)
-{
+int getFileSize(const char* filePath, u64_t& fileLen) {
   if (filePath == NULL || *filePath == '\0') {
     std::cerr << "invalid filepath" << std::endl;
     return -EINVAL;

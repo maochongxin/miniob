@@ -37,26 +37,24 @@ See the Mulan PSL v2 for more details. */
 using namespace common;
 
 const std::string DefaultStorageStage::QUERY_METRIC_TAG = "DefaultStorageStage.query";
-const char *CONF_BASE_DIR = "BaseDir";
-const char *CONF_SYSTEM_DB = "SystemDb";
+const char* CONF_BASE_DIR = "BaseDir";
+const char* CONF_SYSTEM_DB = "SystemDb";
 
-const char *DEFAULT_SYSTEM_DB = "sys";
+const char* DEFAULT_SYSTEM_DB = "sys";
 
 //! Constructor
-DefaultStorageStage::DefaultStorageStage(const char *tag) : Stage(tag), handler_(nullptr)
-{}
+DefaultStorageStage::DefaultStorageStage(const char* tag) : Stage(tag), handler_(nullptr) {
+}
 
 //! Destructor
-DefaultStorageStage::~DefaultStorageStage()
-{
+DefaultStorageStage::~DefaultStorageStage() {
   delete handler_;
   handler_ = nullptr;
 }
 
 //! Parse properties, instantiate a stage object
-Stage *DefaultStorageStage::make_stage(const std::string &tag)
-{
-  DefaultStorageStage *stage = new (std::nothrow) DefaultStorageStage(tag.c_str());
+Stage* DefaultStorageStage::make_stage(const std::string& tag) {
+  DefaultStorageStage* stage = new (std::nothrow) DefaultStorageStage(tag.c_str());
   if (stage == nullptr) {
     LOG_ERROR("new DefaultStorageStage failed");
     return nullptr;
@@ -66,8 +64,7 @@ Stage *DefaultStorageStage::make_stage(const std::string &tag)
 }
 
 //! Set properties for this object set in stage specific properties
-bool DefaultStorageStage::set_properties()
-{
+bool DefaultStorageStage::set_properties() {
   std::string stageNameStr(stage_name_);
   std::map<std::string, std::string> section = get_properties()->get(stageNameStr);
 
@@ -78,9 +75,9 @@ bool DefaultStorageStage::set_properties()
     return false;
   }
 
-  const char *base_dir = iter->second.c_str();
+  const char* base_dir = iter->second.c_str();
 
-  const char *sys_db = DEFAULT_SYSTEM_DB;
+  const char* sys_db = DEFAULT_SYSTEM_DB;
   iter = section.find(CONF_SYSTEM_DB);
   if (iter != section.end()) {
     sys_db = iter->second.c_str();
@@ -105,7 +102,7 @@ bool DefaultStorageStage::set_properties()
     return false;
   }
 
-  Session &default_session = Session::default_session();
+  Session& default_session = Session::default_session();
   default_session.set_current_db(sys_db);
 
   LOG_INFO("Open system db success: %s", sys_db);
@@ -113,11 +110,10 @@ bool DefaultStorageStage::set_properties()
 }
 
 //! Initialize stage params and validate outputs
-bool DefaultStorageStage::initialize()
-{
+bool DefaultStorageStage::initialize() {
   LOG_TRACE("Enter");
 
-  MetricsRegistry &metricsRegistry = get_metrics_registry();
+  MetricsRegistry& metricsRegistry = get_metrics_registry();
   query_metric_ = new SimpleTimer();
   metricsRegistry.register_metric(QUERY_METRIC_TAG, query_metric_);
 
@@ -126,8 +122,7 @@ bool DefaultStorageStage::initialize()
 }
 
 //! Cleanup after disconnection
-void DefaultStorageStage::cleanup()
-{
+void DefaultStorageStage::cleanup() {
   LOG_TRACE("Enter");
 
   if (handler_) {
@@ -137,22 +132,21 @@ void DefaultStorageStage::cleanup()
   LOG_TRACE("Exit");
 }
 
-void DefaultStorageStage::handle_event(StageEvent *event)
-{
+void DefaultStorageStage::handle_event(StageEvent* event) {
   LOG_TRACE("Enter\n");
   TimerStat timerStat(*query_metric_);
 
-  SQLStageEvent *sql_event = static_cast<SQLStageEvent *>(event);
+  SQLStageEvent* sql_event = static_cast<SQLStageEvent*>(event);
 
-  Query *sql = sql_event->query();
+  Query* sql = sql_event->query();
 
-  SessionEvent *session_event = sql_event->session_event();
+  SessionEvent* session_event = sql_event->session_event();
 
-  Session *session = session_event->get_client()->session;
-  Db *db = session->get_current_db();
-  const char *dbname = db->name();
+  Session* session = session_event->get_client()->session;
+  Db* db = session->get_current_db();
+  const char* dbname = db->name();
 
-  Trx *current_trx = session->current_trx();
+  Trx* current_trx = session->current_trx();
 
   RC rc = RC::SUCCESS;
 
@@ -163,8 +157,8 @@ void DefaultStorageStage::handle_event(StageEvent *event)
         从文件导入数据，如果做性能测试，需要保持这些代码可以正常工作
         load data infile `your/file/path` into table `table-name`;
        */
-      const char *table_name = sql->sstr.load_data.relation_name;
-      const char *file_name = sql->sstr.load_data.file_name;
+      const char* table_name = sql->sstr.load_data.relation_name;
+      const char* file_name = sql->sstr.load_data.file_name;
       std::string result = load_data(dbname, table_name, file_name);
       snprintf(response, sizeof(response), "%s", result.c_str());
     } break;
@@ -186,10 +180,9 @@ void DefaultStorageStage::handle_event(StageEvent *event)
   LOG_TRACE("Exit\n");
 }
 
-void DefaultStorageStage::callback_event(StageEvent *event, CallbackContext *context)
-{
+void DefaultStorageStage::callback_event(StageEvent* event, CallbackContext* context) {
   LOG_TRACE("Enter\n");
-  StorageEvent *storage_event = static_cast<StorageEvent *>(event);
+  StorageEvent* storage_event = static_cast<StorageEvent*>(event);
   storage_event->sql_event()->done_immediate();
   LOG_TRACE("Exit\n");
   return;
@@ -204,8 +197,7 @@ void DefaultStorageStage::callback_event(StageEvent *event, CallbackContext *con
  * @return 成功返回RC::SUCCESS
  */
 RC insert_record_from_file(
-    Table *table, std::vector<std::string> &file_values, std::vector<Value> &record_values, std::stringstream &errmsg)
-{
+    Table* table, std::vector<std::string>& file_values, std::vector<Value>& record_values, std::stringstream& errmsg) {
 
   const int field_num = record_values.size();
   const int sys_field_num = table->table_meta().sys_field_num();
@@ -218,9 +210,9 @@ RC insert_record_from_file(
 
   std::stringstream deserialize_stream;
   for (int i = 0; i < field_num && RC::SUCCESS == rc; i++) {
-    const FieldMeta *field = table->table_meta().field(i + sys_field_num);
+    const FieldMeta* field = table->table_meta().field(i + sys_field_num);
 
-    std::string &file_value = file_values[i];
+    std::string& file_value = file_values[i];
     common::strip(file_value);
 
     switch (field->type()) {
@@ -269,17 +261,14 @@ RC insert_record_from_file(
       errmsg << "insert failed.";
     }
   }
-  for (int i = 0; i < field_num; i++) {
-    value_destroy(&record_values[i]);
-  }
+  for (int i = 0; i < field_num; i++) { value_destroy(&record_values[i]); }
   return rc;
 }
 
-std::string DefaultStorageStage::load_data(const char *db_name, const char *table_name, const char *file_name)
-{
+std::string DefaultStorageStage::load_data(const char* db_name, const char* table_name, const char* file_name) {
 
   std::stringstream result_string;
-  Table *table = handler_->find_table(db_name, table_name);
+  Table* table = handler_->find_table(db_name, table_name);
   if (nullptr == table) {
     result_string << "No such table " << db_name << "." << table_name << std::endl;
     return result_string.str();

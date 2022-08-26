@@ -24,19 +24,17 @@ See the Mulan PSL v2 for more details. */
 
 namespace common {
 
-HistogramSnapShot::HistogramSnapShot()
-{}
+HistogramSnapShot::HistogramSnapShot() {
+}
 
-HistogramSnapShot::HistogramSnapShot(const std::vector<double> &collection)
-{
+HistogramSnapShot::HistogramSnapShot(const std::vector<double>& collection) {
   set_collection(collection);
 }
 
-HistogramSnapShot::~HistogramSnapShot()
-{}
+HistogramSnapShot::~HistogramSnapShot() {
+}
 
-void HistogramSnapShot::set_collection(const std::vector<double> &collection)
-{
+void HistogramSnapShot::set_collection(const std::vector<double>& collection) {
   if (collection.empty()) {
     return;
   }
@@ -45,13 +43,11 @@ void HistogramSnapShot::set_collection(const std::vector<double> &collection)
   std::sort(data_.begin(), data_.end());
 }
 
-size_t HistogramSnapShot::size() const
-{
+size_t HistogramSnapShot::size() const {
   return data_.size();
 }
 
-double HistogramSnapShot::get_value(double quantile)
-{
+double HistogramSnapShot::get_value(double quantile) {
   if (quantile > 1.0f) {
     quantile = 1.0f;
   }
@@ -80,36 +76,29 @@ double HistogramSnapShot::get_value(double quantile)
   return lower + (pos - floor(pos)) * (upper - lower);
 }
 
-double HistogramSnapShot::get_median()
-{
+double HistogramSnapShot::get_median() {
   return get_value(0.5f);
 }
 
-double HistogramSnapShot::get_75th()
-{
+double HistogramSnapShot::get_75th() {
   return get_value(0.75f);
 }
 
-double HistogramSnapShot::get_90th()
-{
+double HistogramSnapShot::get_90th() {
   return get_value(0.90f);
 }
 
-double HistogramSnapShot::get_95th()
-{
+double HistogramSnapShot::get_95th() {
   return get_value(0.95f);
 }
-double HistogramSnapShot::get_99th()
-{
+double HistogramSnapShot::get_99th() {
   return get_value(0.99f);
 }
-double HistogramSnapShot::get_999th()
-{
+double HistogramSnapShot::get_999th() {
   return get_value(0.999f);
 }
 
-double HistogramSnapShot::get_max()
-{
+double HistogramSnapShot::get_max() {
   if (data_.empty()) {
     return 0.0f;
   }
@@ -117,8 +106,7 @@ double HistogramSnapShot::get_max()
   return static_cast<double>(*data_.rbegin());
 }
 
-double HistogramSnapShot::get_min()
-{
+double HistogramSnapShot::get_min() {
   if (data_.empty()) {
     return 0.0f;
   }
@@ -126,8 +114,7 @@ double HistogramSnapShot::get_min()
   return static_cast<double>(*data_.begin());
 }
 
-double HistogramSnapShot::get_mean()
-{
+double HistogramSnapShot::get_mean() {
   if (data_.empty()) {
     return 0.0f;
   }
@@ -135,13 +122,11 @@ double HistogramSnapShot::get_mean()
   return std::accumulate(data_.begin(), data_.end(), (double)0) * 1.0f / data_.size();
 }
 
-const std::vector<double> &HistogramSnapShot::get_values()
-{
+const std::vector<double>& HistogramSnapShot::get_values() {
   return data_;
 }
 
-std::string HistogramSnapShot::to_string()
-{
+std::string HistogramSnapShot::to_string() {
   std::stringstream oss;
   oss << "mean:" << get_mean() << ",min:" << get_min() << ",max:" << get_max() << ",median:" << get_median()
       << ", 75th:" << get_75th() << ",90th:" << get_90th() << ",99th:" << get_99th() << ",999th:" << get_999th();

@@ -19,9 +19,8 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 class SelectDir {
-public:
-  virtual std::string select()
-  {
+ public:
+  virtual std::string select() {
     return std::string("");
   };
   virtual void setBaseDir(std::string baseDir){};

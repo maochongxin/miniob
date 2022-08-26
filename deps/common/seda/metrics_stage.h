@@ -20,23 +20,23 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 class MetricsStage : public Stage {
-public:
+ public:
   ~MetricsStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  MetricsStage(const char *tag);
+  MetricsStage(const char* tag);
   bool set_properties();
 
   bool initialize();
   void cleanup();
-  void handle_event(StageEvent *event);
-  void callback_event(StageEvent *event, CallbackContext *context);
+  void handle_event(StageEvent* event);
+  void callback_event(StageEvent* event, CallbackContext* context);
 
-protected:
-private:
-  Stage *timer_stage_ = nullptr;
+ protected:
+ private:
+  Stage* timer_stage_ = nullptr;
   // report metrics every @metric_report_interval_ seconds
   int metric_report_interval_ = 10;
 };

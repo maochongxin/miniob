@@ -17,38 +17,33 @@ See the Mulan PSL v2 for more details. */
 #include "storage/common/db.h"
 #include "storage/default/default_handler.h"
 
-Session &Session::default_session()
-{
+Session& Session::default_session() {
   static Session session;
   return session;
 }
 
-Session::Session(const Session &other) : db_(other.db_)
-{}
+Session::Session(const Session& other) : db_(other.db_) {
+}
 
-Session::~Session()
-{
+Session::~Session() {
   delete trx_;
   trx_ = nullptr;
 }
 
-const char *Session::get_current_db_name() const
-{
+const char* Session::get_current_db_name() const {
   if (db_ != nullptr)
     return db_->name();
   else
     return "";
 }
 
-Db *Session::get_current_db() const
-{
+Db* Session::get_current_db() const {
   return db_;
 }
 
-void Session::set_current_db(const std::string &dbname)
-{
-  DefaultHandler &handler = DefaultHandler::get_default();
-  Db *db = handler.find_db(dbname.c_str());
+void Session::set_current_db(const std::string& dbname) {
+  DefaultHandler& handler = DefaultHandler::get_default();
+  Db* db = handler.find_db(dbname.c_str());
   if (db == nullptr) {
     LOG_WARN("no such database: %s", dbname.c_str());
     return;
@@ -58,18 +53,15 @@ void Session::set_current_db(const std::string &dbname)
   db_ = db;
 }
 
-void Session::set_trx_multi_operation_mode(bool multi_operation_mode)
-{
+void Session::set_trx_multi_operation_mode(bool multi_operation_mode) {
   trx_multi_operation_mode_ = multi_operation_mode;
 }
 
-bool Session::is_trx_multi_operation_mode() const
-{
+bool Session::is_trx_multi_operation_mode() const {
   return trx_multi_operation_mode_;
 }
 
-Trx *Session::current_trx()
-{
+Trx* Session::current_trx() {
   if (trx_ == nullptr) {
     trx_ = new Trx;
   }

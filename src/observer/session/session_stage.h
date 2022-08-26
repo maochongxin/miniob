@@ -27,28 +27,28 @@ See the Mulan PSL v2 for more details. */
  * 这时当调用StageEvent::done(Immediate)时，就会调用该事件注册的回调函数。
  */
 class SessionStage : public common::Stage {
-public:
+ public:
   ~SessionStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  SessionStage(const char *tag);
+  SessionStage(const char* tag);
   bool set_properties() override;
 
   bool initialize() override;
   void cleanup() override;
-  void handle_event(common::StageEvent *event) override;
-  void callback_event(common::StageEvent *event, common::CallbackContext *context) override;
+  void handle_event(common::StageEvent* event) override;
+  void callback_event(common::StageEvent* event, common::CallbackContext* context) override;
 
-protected:
-  void handle_input(common::StageEvent *event);
+ protected:
+  void handle_input(common::StageEvent* event);
 
-  void handle_request(common::StageEvent *event);
+  void handle_request(common::StageEvent* event);
 
-private:
-  Stage *plan_cache_stage_ = nullptr;
-  common::SimpleTimer *sql_metric_ = nullptr;
+ private:
+  Stage* plan_cache_stage_ = nullptr;
+  common::SimpleTimer* sql_metric_ = nullptr;
   static const std::string SQL_METRIC_TAG;
 };
 

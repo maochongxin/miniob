@@ -37,16 +37,16 @@ class Threadpool;
  */
 class KillThreadStage : public Stage {
 
-public:
+ public:
   /**
    * parse properties, instantiate a summation stage object
    * @pre class members are uninitialized
    * @post initializing the class members
    * @return Stage instantiated object
    */
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   /**
    * Constructor
    * @param[in] tag     The label that identifies this stage.
@@ -55,8 +55,8 @@ protected:
    * @post event queue is empty
    * @post stage is not connected
    */
-  KillThreadStage(const char *tag) : Stage(tag)
-  {}
+  KillThreadStage(const char* tag) : Stage(tag) {
+  }
 
   /**
    * Notify the pool and kill the thread
@@ -64,14 +64,13 @@ protected:
    *
    * @post  Call never returns.  Thread is killed.  Pool is notified.
    */
-  void handle_event(StageEvent *event);
+  void handle_event(StageEvent* event);
 
   /**
    * Handle the callback
    * Nothing special for callbacks in this stage.
    */
-  void callback_event(StageEvent *event, CallbackContext *context)
-  {
+  void callback_event(StageEvent* event, CallbackContext* context) {
     return;
   }
 
@@ -82,8 +81,7 @@ protected:
    * @pre  Stage not connected
    * @return true
    */
-  bool initialize()
-  {
+  bool initialize() {
     return true;
   }
 

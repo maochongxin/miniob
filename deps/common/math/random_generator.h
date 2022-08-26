@@ -22,15 +22,15 @@ namespace common {
 
 class RandomGenerator {
 
-public:
+ public:
   RandomGenerator();
   virtual ~RandomGenerator();
 
-public:
+ public:
   unsigned int next();
   unsigned int next(unsigned int range);
 
-private:
+ private:
   // The GUN Extended TLS Version
   std::mt19937 randomData;
 };

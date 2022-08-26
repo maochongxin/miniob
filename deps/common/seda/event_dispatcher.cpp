@@ -17,8 +17,7 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 // Constructor
-EventDispatcher::EventDispatcher(const char *tag) : Stage(tag), event_store_(), next_stage_(NULL)
-{
+EventDispatcher::EventDispatcher(const char* tag) : Stage(tag), event_store_(), next_stage_(NULL) {
   LOG_TRACE("enter\n");
 
   pthread_mutexattr_t attr;
@@ -31,8 +30,7 @@ EventDispatcher::EventDispatcher(const char *tag) : Stage(tag), event_store_(), 
 }
 
 // Destructor
-EventDispatcher::~EventDispatcher()
-{
+EventDispatcher::~EventDispatcher() {
   LOG_TRACE("enter\n");
   pthread_mutex_destroy(&event_lock_);
   LOG_TRACE("exit\n");
@@ -43,12 +41,11 @@ EventDispatcher::~EventDispatcher()
  * Check if the event can be dispatched. If not, hash it and store
  * it.  If so, send it on to the next stage.
  */
-void EventDispatcher::handle_event(StageEvent *event)
-{
+void EventDispatcher::handle_event(StageEvent* event) {
   LOG_TRACE("enter\n");
 
   std::string hash;
-  DispatchContext *ctx = NULL;
+  DispatchContext* ctx = NULL;
   status_t stat;
 
   pthread_mutex_lock(&event_lock_);
@@ -69,8 +66,7 @@ void EventDispatcher::handle_event(StageEvent *event)
 }
 
 // Initialize stage params and validate outputs
-bool EventDispatcher::initialize()
-{
+bool EventDispatcher::initialize() {
   bool ret_val = true;
 
   if (next_stage_list_.size() != 1) {
@@ -85,17 +81,14 @@ bool EventDispatcher::initialize()
  * Cleanup stage after disconnection
  * Call done() on any events left over in the event_store_.
  */
-void EventDispatcher::cleanup()
-{
+void EventDispatcher::cleanup() {
   pthread_mutex_lock(&event_lock_);
 
   // for each hash chain...
   for (EventHash::iterator i = event_store_.begin(); i != event_store_.end(); i++) {
 
     // for each event on the chain
-    for (std::list<StoredEvent>::iterator j = i->second.begin(); j != i->second.end(); j++) {
-      j->first->done();
-    }
+    for (std::list<StoredEvent>::iterator j = i->second.begin(); j != i->second.end(); j++) { j->first->done(); }
     i->second.clear();
   }
   event_store_.clear();
@@ -104,8 +97,7 @@ void EventDispatcher::cleanup()
 }
 
 // Wake up a stored event
-bool EventDispatcher::wakeup_event(std::string hashkey)
-{
+bool EventDispatcher::wakeup_event(std::string hashkey) {
   bool sent = false;
   EventHash::iterator i;
 

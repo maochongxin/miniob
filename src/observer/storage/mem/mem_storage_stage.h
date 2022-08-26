@@ -19,25 +19,25 @@ See the Mulan PSL v2 for more details. */
 #include "common/metrics/metrics.h"
 
 class MemStorageStage : public common::Stage {
-public:
+ public:
   ~MemStorageStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  MemStorageStage(const char *tag);
+  MemStorageStage(const char* tag);
   bool set_properties();
 
   bool initialize();
   void cleanup();
-  void handle_event(common::StageEvent *event);
-  void callback_event(common::StageEvent *event, common::CallbackContext *context);
+  void handle_event(common::StageEvent* event);
+  void callback_event(common::StageEvent* event, common::CallbackContext* context);
 
-protected:
-  common::SimpleTimer *queryMetric = nullptr;
+ protected:
+  common::SimpleTimer* queryMetric = nullptr;
   static const std::string QUERY_METRIC_TAG;
 
-private:
+ private:
 };
 
 #endif  //__OBSERVER_STORAGE_MEM_STORAGE_STAGE_H__

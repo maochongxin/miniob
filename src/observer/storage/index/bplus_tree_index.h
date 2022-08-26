@@ -19,41 +19,42 @@ See the Mulan PSL v2 for more details. */
 #include "storage/index/bplus_tree.h"
 
 class BplusTreeIndex : public Index {
-public:
+ public:
   BplusTreeIndex() = default;
   virtual ~BplusTreeIndex() noexcept;
 
-  RC create(const char *file_name, const IndexMeta &index_meta, const FieldMeta &field_meta);
-  RC open(const char *file_name, const IndexMeta &index_meta, const FieldMeta &field_meta);
+  RC create(const char* file_name, const IndexMeta& index_meta, const FieldMeta& field_meta);
+  RC open(const char* file_name, const IndexMeta& index_meta, const FieldMeta& field_meta);
   RC close();
 
-  RC insert_entry(const char *record, const RID *rid) override;
-  RC delete_entry(const char *record, const RID *rid) override;
+  RC insert_entry(const char* record, const RID* rid) override;
+  RC delete_entry(const char* record, const RID* rid) override;
 
   /**
    * 扫描指定范围的数据
    */
-  IndexScanner *create_scanner(const char *left_key, int left_len, bool left_inclusive,
-			       const char *right_key, int right_len, bool right_inclusive) override;
+  IndexScanner* create_scanner(const char* left_key, int left_len, bool left_inclusive, const char* right_key,
+      int right_len, bool right_inclusive) override;
 
   RC sync() override;
 
-private:
+ private:
   bool inited_ = false;
   BplusTreeHandler index_handler_;
 };
 
 class BplusTreeIndexScanner : public IndexScanner {
-public:
-  BplusTreeIndexScanner(BplusTreeHandler &tree_handle);
+ public:
+  BplusTreeIndexScanner(BplusTreeHandler& tree_handle);
   ~BplusTreeIndexScanner() noexcept override;
 
-  RC next_entry(RID *rid) override;
+  RC next_entry(RID* rid) override;
   RC destroy() override;
 
-  RC open(const char *left_key, int left_len, bool left_inclusive,
-          const char *right_key, int right_len, bool right_inclusive);
-private:
+  RC open(const char* left_key, int left_len, bool left_inclusive, const char* right_key, int right_len,
+      bool right_inclusive);
+
+ private:
   BplusTreeScanner tree_scanner_;
 };
 

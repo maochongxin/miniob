@@ -54,8 +54,8 @@ struct Page {
  *         效率非常低，你有办法优化吗？
  */
 struct BPFileHeader {
-  int32_t page_count;        //! 当前文件一共有多少个页面
-  int32_t allocated_pages;   //! 已经分配了多少个页面
+  int32_t page_count;       //! 当前文件一共有多少个页面
+  int32_t allocated_pages;  //! 已经分配了多少个页面
   common::Cache<common::SimpleLRU<PageNum, bool>>* usage;
   /**
    * 能够分配的最大的页面个数，即bitmap的字节数 乘以8
@@ -63,21 +63,17 @@ struct BPFileHeader {
   static const int MAX_PAGE_NUM = (BP_PAGE_DATA_SIZE - sizeof(page_count) - sizeof(allocated_pages)) * 8;
 };
 
-class Frame
-{
-public:
-  void clear_page()
-  {
+class Frame {
+ public:
+  void clear_page() {
     memset(&page_, 0, sizeof(page_));
   }
 
-  PageNum page_num() const
-  {
+  PageNum page_num() const {
     return page_.page_num;
   }
 
-  void set_page_num(PageNum page_num)
-  {
+  void set_page_num(PageNum page_num) {
     page_.page_num = page_num;
   }
 
@@ -89,79 +85,75 @@ public:
     dirty_ = true;
   }
 
-  char *data() {
+  char* data() {
     return page_.data;
   }
 
-  int file_desc() const
-  {
+  int file_desc() const {
     return file_desc_;
   }
 
-  void set_file_desc(int fd)
-  {
+  void set_file_desc(int fd) {
     file_desc_ = fd;
   }
-  bool can_purge()
-  {
+  bool can_purge() {
     return pin_count_ <= 0;
   }
-private:
+
+ private:
   friend class DiskBufferPool;
 
-  bool          dirty_     = false;
-  unsigned int  pin_count_ = 0;
-  unsigned long acc_time_  = 0;
-  int           file_desc_ = -1;
-  Page          page_;
+  bool dirty_ = false;
+  unsigned int pin_count_ = 0;
+  unsigned long acc_time_ = 0;
+  int file_desc_ = -1;
+  Page page_;
 };
 
-class BPFrameManager : public common::MemPoolSimple<Frame>
-{
-public:
-  BPFrameManager(const char *tag);
+class BPFrameManager : public common::MemPoolSimple<Frame> {
+ public:
+  BPFrameManager(const char* tag);
 
-  Frame *get(int file_desc, PageNum page_num);
+  Frame* get(int file_desc, PageNum page_num);
 
-  std::list<Frame *> find_list(int file_desc);
+  std::list<Frame*> find_list(int file_desc);
 
   /**
    * 如果不能从空闲链表中分配新的页面，就使用这个接口，
    * 尝试从pin count=0的页面中淘汰一个
    */
-  Frame *begin_purge();
+  Frame* begin_purge();
 };
 
-class BufferPoolIterator
-{
-public:
+class BufferPoolIterator {
+ public:
   BufferPoolIterator();
   ~BufferPoolIterator();
 
-  RC init(DiskBufferPool &bp, PageNum start_page = 0);
+  RC init(DiskBufferPool& bp, PageNum start_page = 0);
   bool has_next();
   PageNum next();
   RC reset();
-private:
-  common::Bitmap   bitmap_;
-  PageNum  current_page_num_ = -1;
+
+ private:
+  common::Bitmap bitmap_;
+  PageNum current_page_num_ = -1;
 };
 
-class DiskBufferPool
-{
-public:
-  DiskBufferPool(BufferPoolManager &bp_manager, BPFrameManager &frame_manager);
+class DiskBufferPool {
+ public:
+  DiskBufferPool(BufferPoolManager& bp_manager, BPFrameManager& frame_manager);
   ~DiskBufferPool();
 
   /**
    * 创建一个名称为指定文件名的分页文件
    */
-  RC create_file(const char *file_name);
+  RC create_file(const char* file_name);
 
   /**
    * 根据文件名打开一个分页文件
    */
-  RC open_file(const char *file_name);
+  RC open_file(const char* file_name);
 
   /**
    * 关闭分页文件
@@ -171,14 +163,14 @@ public:
   /**
    * 根据文件ID和页号获取指定页面到缓冲区，返回页面句柄指针。
    */
-  RC get_this_page(PageNum page_num, Frame **frame);
+  RC get_this_page(PageNum page_num, Frame** frame);
 
   /**
    * 在指定文件中分配一个新的页面，并将其放入缓冲区，返回页面句柄指针。
    * 分配页面时，如果文件中有空闲页，就直接分配一个空闲页；
    * 如果文件中没有空闲页，则扩展文件规模来增加新的空闲页。
    */
-  RC allocate_page(Frame **frame);
+  RC allocate_page(Frame** frame);
 
   /**
    * 比purge_page多一个动作， 在磁盘上将对应的页数据删掉。
@@ -197,12 +189,12 @@ public:
    * 该页面被设置为驻留缓冲区状态，以防止其在处理过程中被置换出去，
    * 因此在该页面使用完之后应调用此函数解除该限制，使得该页面此后可以正常地被淘汰出缓冲区
    */
-  RC unpin_page(Frame *frame);
+  RC unpin_page(Frame* frame);
 
   /**
    * 获取文件的总页数
    */
-  RC get_page_count(int *page_count);
+  RC get_page_count(int* page_count);
 
   /**
    * 检查是否所有页面都是pin count == 0状态(除了第1个页面)
@@ -215,60 +207,59 @@ public:
   /**
    * 如果页面是脏的，就将数据刷新到磁盘
    */
-  RC flush_page(Frame &frame);
+  RC flush_page(Frame& frame);
 
   /**
    * 刷新所有页面到磁盘，即使pin count不是0
    */
   RC flush_all_pages();
 
-protected:
-  RC allocate_frame(Frame **buf);
+ protected:
+  RC allocate_frame(Frame** buf);
 
   /**
    * 刷新指定页面到磁盘(flush)，并且释放关联的Frame
    */
-  RC purge_frame(Frame *used_frame);
+  RC purge_frame(Frame* used_frame);
   RC check_page_num(PageNum page_num);
 
   /**
    * 加载指定页面的数据到内存中
    */
-  RC load_page(PageNum page_num, Frame *frame);
+  RC load_page(PageNum page_num, Frame* frame);
 
-private:
-  BufferPoolManager &bp_manager_;
-  BPFrameManager &   frame_manager_;
-  std::string        file_name_;
-  int                file_desc_ = -1;
-  Frame *            hdr_frame_ = nullptr;
-  BPFileHeader *     file_header_ = nullptr;
-  std::set<PageNum>  disposed_pages;
+ private:
+  BufferPoolManager& bp_manager_;
+  BPFrameManager& frame_manager_;
+  std::string file_name_;
+  int file_desc_ = -1;
+  Frame* hdr_frame_ = nullptr;
+  BPFileHeader* file_header_ = nullptr;
+  std::set<PageNum> disposed_pages;
 
-private:
+ private:
   friend class BufferPoolIterator;
 };
 
-class BufferPoolManager
-{
-public:
+class BufferPoolManager {
+ public:
   BufferPoolManager();
   ~BufferPoolManager();
 
-  RC create_file(const char *file_name);
-  RC open_file(const char *file_name, DiskBufferPool *&bp);
-  RC close_file(const char *file_name);
+  RC create_file(const char* file_name);
+  RC open_file(const char* file_name, DiskBufferPool*& bp);
+  RC close_file(const char* file_name);
 
-  RC flush_page(Frame &frame);
+  RC flush_page(Frame& frame);
 
-public:
-  static void set_instance(BufferPoolManager *bpm);
-  static BufferPoolManager &instance();
-  
-private:
+ public:
+  static void set_instance(BufferPoolManager* bpm);
+  static BufferPoolManager& instance();
+
+ private:
   BPFrameManager frame_manager_{"BufPool"};
-  std::unordered_map<std::string, DiskBufferPool *> buffer_pools_;
-  std::unordered_map<int, DiskBufferPool *> fd_buffer_pools_;
+  std::unordered_map<std::string, DiskBufferPool*> buffer_pools_;
+  std::unordered_map<int, DiskBufferPool*> fd_buffer_pools_;
 };
 
 #endif  //__OBSERVER_STORAGE_COMMON_PAGE_MANAGER_H_

@@ -17,15 +17,13 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 //! Global process config
-ProcessParam *&the_process_param()
-{
-  static ProcessParam *process_cfg = new ProcessParam();
+ProcessParam*& the_process_param() {
+  static ProcessParam* process_cfg = new ProcessParam();
 
   return process_cfg;
 }
 
-void ProcessParam::init_default(std::string &process_name)
-{
+void ProcessParam::init_default(std::string& process_name) {
   assert(process_name.empty() == false);
   this->process_name_ = process_name;
   if (std_out_.empty()) {
