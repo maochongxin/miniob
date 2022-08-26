@@ -39,20 +39,18 @@ See the Mulan PSL v2 for more details. */
 using namespace common;
 
 #ifdef USE_READLINE
-char *my_readline(const char *prompt) 
-{
+char* my_readline(const char* prompt) {
   return readline(prompt);
 }
-#else // USE_READLINE
-char *my_readline(const char *prompt)
-{
-  char *buffer = (char *)malloc(MAX_MEM_BUFFER_SIZE);
+#else   // USE_READLINE
+char* my_readline(const char* prompt) {
+  char* buffer = (char*)malloc(MAX_MEM_BUFFER_SIZE);
   if (nullptr == buffer) {
     fprintf(stderr, "failed to alloc line buffer");
     return nullptr;
   }
   fprintf(stdout, prompt);
-  char *s = fgets(buffer, MAX_MEM_BUFFER_SIZE, stdin);
+  char* s = fgets(buffer, MAX_MEM_BUFFER_SIZE, stdin);
   if (nullptr == s) {
     fprintf(stderr, "failed to read message from console");
     free(buffer);
@@ -60,20 +58,17 @@ char *my_readline(const char *prompt)
   }
   return buffer;
 }
-#endif // USE_READLINE
+#endif  // USE_READLINE
 
 /* this function config a exit-cmd list, strncasecmp func truncate the command from terminal according to the number,
-   'strncasecmp("exit", cmd, 4)' means that obclient read command string from terminal, truncate it to 4 chars from 
+   'strncasecmp("exit", cmd, 4)' means that obclient read command string from terminal, truncate it to 4 chars from
    the beginning, then compare the result with 'exit', if they match, exit the obclient.
 */
-bool is_exit_command(const char *cmd) {
-  return 0 == strncasecmp("exit", cmd, 4) ||
-         0 == strncasecmp("bye", cmd, 3) ||
-         0 == strncasecmp("\\q", cmd, 2) ;
+bool is_exit_command(const char* cmd) {
+  return 0 == strncasecmp("exit", cmd, 4) || 0 == strncasecmp("bye", cmd, 3) || 0 == strncasecmp("\\q", cmd, 2);
 }
 
-int init_unix_sock(const char *unix_sock_path)
-{
+int init_unix_sock(const char* unix_sock_path) {
   int sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (sockfd < 0) {
     fprintf(stderr, "failed to create unix socket. %s", strerror(errno));
@@ -85,7 +80,7 @@ int init_unix_sock(const char *unix_sock_path)
   sockaddr.sun_family = PF_UNIX;
   snprintf(sockaddr.sun_path, sizeof(sockaddr.sun_path), "%s", unix_sock_path);
 
-  if (connect(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
+  if (connect(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
     fprintf(stderr, "failed to connect to server. unix socket path '%s'. error %s", sockaddr.sun_path, strerror(errno));
     close(sockfd);
     return -1;
@@ -93,9 +88,8 @@ int init_unix_sock(const char *unix_sock_path)
   return sockfd;
 }
 
-int init_tcp_sock(const char *server_host, int server_port)
-{
-  struct hostent *host;
+int init_tcp_sock(const char* server_host, int server_port) {
+  struct hostent* host;
   struct sockaddr_in serv_addr;
 
   if ((host = gethostbyname(server_host)) == NULL) {
@@ -111,10 +105,10 @@ int init_tcp_sock(const char *server_host, int server_port)
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(server_port);
-  serv_addr.sin_addr = *((struct in_addr *)host->h_addr);
+  serv_addr.sin_addr = *((struct in_addr*)host->h_addr);
   bzero(&(serv_addr.sin_zero), 8);
 
-  if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {
+  if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(struct sockaddr)) == -1) {
     fprintf(stderr, "Failed to connect. errmsg=%d:%s\n", errno, strerror(errno));
     close(sockfd);
     return -1;
@@ -122,13 +116,12 @@ int init_tcp_sock(const char *server_host, int server_port)
   return sockfd;
 }
 
-int main(int argc, char *argv[])
-{
-  const char *unix_socket_path = nullptr;
-  const char *server_host = "127.0.0.1";
+int main(int argc, char* argv[]) {
+  const char* unix_socket_path = nullptr;
+  const char* server_host = "127.0.0.1";
   int server_port = PORT_DEFAULT;
   int opt;
-  extern char *optarg;
+  extern char* optarg;
   while ((opt = getopt(argc, argv, "s:h:p:")) > 0) {
     switch (opt) {
       case 's':
@@ -143,7 +136,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  const char *prompt_str = "miniob > ";
+  const char* prompt_str = "miniob > ";
 
   int sockfd, send_bytes;
 
@@ -158,7 +151,7 @@ int main(int argc, char *argv[])
 
   char send_buf[MAX_MEM_BUFFER_SIZE];
 
-  char *input_command = nullptr;
+  char* input_command = nullptr;
   while ((input_command = my_readline(prompt_str)) != nullptr) {
     if (common::is_blank(input_command)) {
       free(input_command);
@@ -170,7 +163,7 @@ int main(int argc, char *argv[])
       break;
     }
 
-    if ((send_bytes = write(sockfd, input_command, strlen(input_command) + 1)) == -1) { // TODO writen
+    if ((send_bytes = write(sockfd, input_command, strlen(input_command) + 1)) == -1) {  // TODO writen
       fprintf(stderr, "send error: %d:%s \n", errno, strerror(errno));
       exit(1);
     }

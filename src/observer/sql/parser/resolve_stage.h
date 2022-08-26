@@ -18,23 +18,23 @@ See the Mulan PSL v2 for more details. */
 #include "common/seda/stage.h"
 
 class ResolveStage : public common::Stage {
-public:
+ public:
   ~ResolveStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  ResolveStage(const char *tag);
+  ResolveStage(const char* tag);
   bool set_properties();
 
   bool initialize();
   void cleanup();
-  void handle_event(common::StageEvent *event);
-  void callback_event(common::StageEvent *event, common::CallbackContext *context);
+  void handle_event(common::StageEvent* event);
+  void callback_event(common::StageEvent* event, common::CallbackContext* context);
 
-protected:
-private:
-  Stage *query_cache_stage_ = nullptr;
+ protected:
+ private:
+  Stage* query_cache_stage_ = nullptr;
 };
 
 #endif  //__OBSERVER_SQL_RESOLVE_STAGE_H__

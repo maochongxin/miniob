@@ -30,13 +30,12 @@ namespace common {
 #define DEFAULT_ITEM_NUM_PER_POOL 128
 #define DEFAULT_POOL_NUM 1
 
-typedef bool (*match)(void *item, void *input_arg);
+typedef bool (*match)(void* item, void* input_arg);
 
 template <class T>
 class MemPool {
-public:
-  MemPool(const char *tag) : name(tag)
-  {
+ public:
+  MemPool(const char* tag) : name(tag) {
     this->size = 0;
 
     pthread_mutexattr_t mutexatr;
@@ -46,8 +45,7 @@ public:
     MUTEX_INIT(&mutex, &mutexatr);
   }
 
-  virtual ~MemPool()
-  {
+  virtual ~MemPool() {
     MUTEX_DESTROY(&mutex);
   }
 
@@ -74,29 +72,29 @@ public:
    * Alloc one frame from memory Pool
    * @return
    */
-  virtual T *alloc() = 0;
+  virtual T* alloc() = 0;
 
   /**
    * Free one item, the resouce will return to memory Pool
    * @param item
    */
-  virtual void free(T *item) = 0;
+  virtual void free(T* item) = 0;
 
   /**
    * Find first used item which match the function of "func"
    * @return
    */
-  virtual T *find(match func, void *arg) = 0;
+  virtual T* find(match func, void* arg) = 0;
 
   /**
    * Find used item which match the function of "func"
    */
-  virtual std::list<T *> find_all(match func, void *arg) = 0;
+  virtual std::list<T*> find_all(match func, void* arg) = 0;
 
   /**
    * Mark the item has been changed;
    */
-  virtual void mark_modified(T *item) = 0;
+  virtual void mark_modified(T* item) = 0;
 
   /**
    * Print the MemPool status
@@ -104,20 +102,17 @@ public:
    */
   virtual std::string to_string() = 0;
 
-  const std::string get_name() const
-  {
+  const std::string get_name() const {
     return name;
   }
-  bool is_dynamic() const
-  {
+  bool is_dynamic() const {
     return dynamic;
   }
-  int get_size() const
-  {
+  int get_size() const {
     return size;
   }
 
-protected:
+ protected:
   pthread_mutex_t mutex;
   int size;
   bool dynamic;
@@ -129,12 +124,11 @@ protected:
  */
 template <class T>
 class MemPoolSimple : public MemPool<T> {
-public:
-  MemPoolSimple(const char *tag) : MemPool<T>(tag)
-  {}
+ public:
+  MemPoolSimple(const char* tag) : MemPool<T>(tag) {
+  }
 
-  virtual ~MemPoolSimple()
-  {
+  virtual ~MemPoolSimple() {
     cleanup();
   }
 
@@ -160,29 +154,29 @@ public:
    * Alloc one frame from memory Pool
    * @return
    */
-  T *alloc();
+  T* alloc();
 
   /**
    * Free one item, the resouce will return to memory Pool
    * @param item
    */
-  void free(T *item);
+  void free(T* item);
 
   /**
    * Find first used item which match the function of "func"
    * @return
    */
-  T *find(match func, void *arg);
+  T* find(match func, void* arg);
 
   /**
    * Find used item which match the function of "func"
    */
-  std::list<T *> find_all(match func, void *arg);
+  std::list<T*> find_all(match func, void* arg);
 
   /**
    * Mark the item has been changed;
    */
-  void mark_modified(T *item);
+  void mark_modified(T* item);
 
   /**
    * Print the MemPool status
@@ -190,30 +184,27 @@ public:
    */
   std::string to_string();
 
-  int get_item_num_per_pool() const
-  {
+  int get_item_num_per_pool() const {
     return item_num_per_pool;
   }
 
-  int get_used_num()
-  {
+  int get_used_num() {
     MUTEX_LOCK(&this->mutex);
     auto num = used.size();
     MUTEX_UNLOCK(&this->mutex);
     return num;
   }
 
-protected:
-  std::list<T *> pools;
-  std::list<T *> lru_used;
-  std::set<T *> used;
-  std::list<T *> frees;
+ protected:
+  std::list<T*> pools;
+  std::list<T*> lru_used;
+  std::set<T*> used;
+  std::list<T*> frees;
   int item_num_per_pool;
 };
 
 template <class T>
-int MemPoolSimple<T>::init(bool dynamic, int pool_num, int item_num_per_pool)
-{
+int MemPoolSimple<T>::init(bool dynamic, int pool_num, int item_num_per_pool) {
   if (pools.empty() == false) {
     LOG_WARN("Memory pool has been initialized, but still begin to be initialized, this->name:%s.", this->name.c_str());
     return 0;
@@ -246,8 +237,7 @@ int MemPoolSimple<T>::init(bool dynamic, int pool_num, int item_num_per_pool)
 }
 
 template <class T>
-void MemPoolSimple<T>::cleanup()
-{
+void MemPoolSimple<T>::cleanup() {
   if (pools.empty() == true) {
     LOG_WARN("Begin to do cleanup, but there is no memory pool, this->name:%s!", this->name.c_str());
     return;
@@ -260,8 +250,8 @@ void MemPoolSimple<T>::cleanup()
   frees.clear();
   this->size = 0;
 
-  for (typename std::list<T *>::iterator iter = pools.begin(); iter != pools.end(); iter++) {
-    T *pool = *iter;
+  for (typename std::list<T*>::iterator iter = pools.begin(); iter != pools.end(); iter++) {
+    T* pool = *iter;
 
     delete[] pool;
   }
@@ -271,15 +261,14 @@ void MemPoolSimple<T>::cleanup()
 }
 
 template <class T>
-int MemPoolSimple<T>::extend()
-{
+int MemPoolSimple<T>::extend() {
   if (this->dynamic == false) {
     LOG_ERROR("Disable dynamic extend memory pool, but begin to extend, this->name:%s", this->name.c_str());
     return -1;
   }
 
   MUTEX_LOCK(&this->mutex);
-  T *pool = new T[item_num_per_pool];
+  T* pool = new T[item_num_per_pool];
   if (pool == nullptr) {
     MUTEX_UNLOCK(&this->mutex);
     LOG_ERROR("Failed to extend memory pool, this->size:%d, item_num_per_pool:%d, this->name:%s.",
@@ -291,9 +280,7 @@ int MemPoolSimple<T>::extend()
 
   pools.push_back(pool);
   this->size += item_num_per_pool;
-  for (int i = 0; i < item_num_per_pool; i++) {
-    frees.push_back(pool + i);
-  }
+  for (int i = 0; i < item_num_per_pool; i++) { frees.push_back(pool + i); }
   MUTEX_UNLOCK(&this->mutex);
 
   LOG_INFO("Extend one pool, this->size:%d, item_num_per_pool:%d, this->name:%s.",
@@ -304,8 +291,7 @@ int MemPoolSimple<T>::extend()
 }
 
 template <class T>
-T *MemPoolSimple<T>::alloc()
-{
+T* MemPoolSimple<T>::alloc() {
   MUTEX_LOCK(&this->mutex);
   if (frees.empty() == true) {
     if (this->dynamic == false) {
@@ -318,7 +304,7 @@ T *MemPoolSimple<T>::alloc()
       return nullptr;
     }
   }
-  T *buffer = frees.front();
+  T* buffer = frees.front();
   frees.pop_front();
 
   used.insert(buffer);
@@ -329,8 +315,7 @@ T *MemPoolSimple<T>::alloc()
 }
 
 template <class T>
-void MemPoolSimple<T>::free(T *buf)
-{
+void MemPoolSimple<T>::free(T* buf) {
   MUTEX_LOCK(&this->mutex);
 
   size_t num = used.erase(buf);
@@ -349,12 +334,11 @@ void MemPoolSimple<T>::free(T *buf)
 }
 
 template <class T>
-T *MemPoolSimple<T>::find(match func, void *arg)
-{
-  T *buffer = nullptr;
+T* MemPoolSimple<T>::find(match func, void* arg) {
+  T* buffer = nullptr;
   MUTEX_LOCK(&this->mutex);
-  for (typename std::list<T *>::iterator it = lru_used.begin(); it != lru_used.end(); ++it) {
-    T *item = *it;
+  for (typename std::list<T*>::iterator it = lru_used.begin(); it != lru_used.end(); ++it) {
+    T* item = *it;
 
     if ((*func)(item, arg) == false) {
       continue;
@@ -368,13 +352,13 @@ T *MemPoolSimple<T>::find(match func, void *arg)
 }
 
 template <class T>
-std::list<T *> MemPoolSimple<T>::find_all(match func, void *arg)
+std::list<T*> MemPoolSimple<T>::find_all(match func, void* arg)
 
 {
-  std::list<T *> ret;
+  std::list<T*> ret;
   MUTEX_LOCK(&this->mutex);
-  for (typename std::list<T *>::iterator it = lru_used.begin(); it != lru_used.end(); ++it) {
-    T *item = *it;
+  for (typename std::list<T*>::iterator it = lru_used.begin(); it != lru_used.end(); ++it) {
+    T* item = *it;
 
     if ((*func)(item, arg) == false) {
       continue;
@@ -387,8 +371,7 @@ std::list<T *> MemPoolSimple<T>::find_all(match func, void *arg)
 }
 
 template <class T>
-void MemPoolSimple<T>::mark_modified(T *buf)
-{
+void MemPoolSimple<T>::mark_modified(T* buf) {
   MUTEX_LOCK(&this->mutex);
 
   if (used.find(buf) == used.end()) {
@@ -405,8 +388,7 @@ void MemPoolSimple<T>::mark_modified(T *buf)
 }
 
 template <class T>
-std::string MemPoolSimple<T>::to_string()
-{
+std::string MemPoolSimple<T>::to_string() {
   std::stringstream ss;
 
   ss << "name:" << this->name << ","
@@ -419,9 +401,8 @@ std::string MemPoolSimple<T>::to_string()
 }
 
 class MemPoolItem {
-public:
-  MemPoolItem(const char *tag) : name(tag)
-  {
+ public:
+  MemPoolItem(const char* tag) : name(tag) {
     this->size = 0;
 
     pthread_mutexattr_t mutexatr;
@@ -431,8 +412,7 @@ public:
     MUTEX_INIT(&mutex, &mutexatr);
   }
 
-  virtual ~MemPoolItem()
-  {
+  virtual ~MemPoolItem() {
     cleanup();
     MUTEX_DESTROY(&mutex);
   }
@@ -460,29 +440,27 @@ public:
    * Alloc one frame from memory Pool
    * @return
    */
-  void *alloc();
+  void* alloc();
 
   /**
    * Free one item, the resouce will return to memory Pool
    * @param item
    */
-  void free(void *item);
+  void free(void* item);
 
   /**
    * Check whether this item has been used before.
    * @param item
    * @return
    */
-  bool is_used(void *item)
-  {
+  bool is_used(void* item) {
     MUTEX_LOCK(&mutex);
     auto it = used.find(item);
     MUTEX_UNLOCK(&mutex);
     return it != used.end();
   }
 
-  std::string to_string()
-  {
+  std::string to_string() {
 
     std::stringstream ss;
 
@@ -495,36 +473,30 @@ public:
     return ss.str();
   }
 
-  const std::string get_name() const
-  {
+  const std::string get_name() const {
     return name;
   }
-  bool is_dynamic() const
-  {
+  bool is_dynamic() const {
     return dynamic;
   }
-  int get_size() const
-  {
+  int get_size() const {
     return size;
   }
-  int get_item_size() const
-  {
+  int get_item_size() const {
     return item_size;
   }
-  int get_item_num_per_pool() const
-  {
+  int get_item_num_per_pool() const {
     return item_num_per_pool;
   }
 
-  int get_used_num()
-  {
+  int get_used_num() {
     MUTEX_LOCK(&mutex);
     auto num = used.size();
     MUTEX_UNLOCK(&mutex);
     return num;
   }
 
-protected:
+ protected:
   pthread_mutex_t mutex;
   std::string name;
   bool dynamic;
@@ -532,9 +504,9 @@ protected:
   int item_size;
   int item_num_per_pool;
 
-  std::list<void *> pools;
-  std::set<void *> used;
-  std::list<void *> frees;
+  std::list<void*> pools;
+  std::set<void*> used;
+  std::list<void*> frees;
 };
 
 }  // namespace common

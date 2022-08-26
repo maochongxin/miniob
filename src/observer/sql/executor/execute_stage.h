@@ -24,34 +24,34 @@ class SessionEvent;
 class SelectStmt;
 
 class ExecuteStage : public common::Stage {
-public:
+ public:
   ~ExecuteStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  ExecuteStage(const char *tag);
+  ExecuteStage(const char* tag);
   bool set_properties() override;
 
   bool initialize() override;
   void cleanup() override;
-  void handle_event(common::StageEvent *event) override;
-  void callback_event(common::StageEvent *event, common::CallbackContext *context) override;
+  void handle_event(common::StageEvent* event) override;
+  void callback_event(common::StageEvent* event, common::CallbackContext* context) override;
 
-  void handle_request(common::StageEvent *event);
-  RC do_help(SQLStageEvent *session_event);
-  RC do_create_table(SQLStageEvent *sql_event);
-  RC do_create_index(SQLStageEvent *sql_event);
-  RC do_show_tables(SQLStageEvent *sql_event);
-  RC do_desc_table(SQLStageEvent *sql_event);
-  RC do_select(SQLStageEvent *sql_event);
-  RC do_insert(SQLStageEvent *sql_event);
-  RC do_delete(SQLStageEvent *sql_event);
+  void handle_request(common::StageEvent* event);
+  RC do_help(SQLStageEvent* session_event);
+  RC do_create_table(SQLStageEvent* sql_event);
+  RC do_create_index(SQLStageEvent* sql_event);
+  RC do_show_tables(SQLStageEvent* sql_event);
+  RC do_desc_table(SQLStageEvent* sql_event);
+  RC do_select(SQLStageEvent* sql_event);
+  RC do_insert(SQLStageEvent* sql_event);
+  RC do_delete(SQLStageEvent* sql_event);
 
-protected:
-private:
-  Stage *default_storage_stage_ = nullptr;
-  Stage *mem_storage_stage_ = nullptr;
+ protected:
+ private:
+  Stage* default_storage_stage_ = nullptr;
+  Stage* mem_storage_stage_ = nullptr;
 };
 
 #endif  //__OBSERVER_SQL_EXECUTE_STAGE_H__

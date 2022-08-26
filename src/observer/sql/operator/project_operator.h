@@ -17,28 +17,27 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/operator.h"
 #include "rc.h"
 
-class ProjectOperator : public Operator
-{
-public:
-  ProjectOperator()
-  {}
+class ProjectOperator : public Operator {
+ public:
+  ProjectOperator() {
+  }
 
   virtual ~ProjectOperator() = default;
 
-  void add_projection(const Table *table, const FieldMeta *field);
+  void add_projection(const Table* table, const FieldMeta* field);
 
   RC open() override;
   RC next() override;
   RC close() override;
 
-  int tuple_cell_num() const
-  {
+  int tuple_cell_num() const {
     return tuple_.cell_num();
   }
 
-  RC tuple_cell_spec_at(int index, const TupleCellSpec *&spec) const;
+  RC tuple_cell_spec_at(int index, const TupleCellSpec*& spec) const;
 
-  Tuple * current_tuple() override;
-private:
+  Tuple* current_tuple() override;
+
+ private:
   ProjectTuple tuple_;
 };

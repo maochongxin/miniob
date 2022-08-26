@@ -23,8 +23,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 namespace common {
 
-std::string getFileName(const std::string &fullPath)
-{
+std::string getFileName(const std::string& fullPath) {
   std::string szRt;
   size_t pos;
   try {
@@ -41,10 +40,9 @@ std::string getFileName(const std::string &fullPath)
   return szRt;
 }
 
-void getFileName(const char *path, std::string &fileName)
-{
+void getFileName(const char* path, std::string& fileName) {
   // Don't care the last character as FILE_PATH_SPLIT
-  const char *endPos = strrchr(path, FILE_PATH_SPLIT);
+  const char* endPos = strrchr(path, FILE_PATH_SPLIT);
   if (endPos == NULL) {
     fileName = path;
     return;
@@ -59,8 +57,7 @@ void getFileName(const char *path, std::string &fileName)
   return;
 }
 
-std::string getDirName(const std::string &fullPath)
-{
+std::string getDirName(const std::string& fullPath) {
   std::string szRt;
   size_t pos;
   try {
@@ -77,10 +74,9 @@ std::string getDirName(const std::string &fullPath)
   } catch (...) {}
   return szRt;
 }
-void getDirName(const char *path, std::string &parent)
-{
+void getDirName(const char* path, std::string& parent) {
   // Don't care the last character as FILE_PATH_SPLIT
-  const char *endPos = strrchr(path, FILE_PATH_SPLIT);
+  const char* endPos = strrchr(path, FILE_PATH_SPLIT);
   if (endPos == NULL) {
     parent = path;
     return;
@@ -95,8 +91,7 @@ void getDirName(const char *path, std::string &parent)
   return;
 }
 
-std::string getFilePath(const std::string &fullPath)
-{
+std::string getFilePath(const std::string& fullPath) {
   std::string szRt;
   size_t pos;
   try {
@@ -113,8 +108,7 @@ std::string getFilePath(const std::string &fullPath)
   return szRt;
 }
 
-std::string getAboslutPath(const char *path)
-{
+std::string getAboslutPath(const char* path) {
   std::string aPath(path);
   if (path[0] != '/') {
     const int MAX_SIZE = 256;
@@ -126,16 +120,13 @@ std::string getAboslutPath(const char *path)
   return aPath;
 }
 
-bool is_directory(const char *path)
-{
+bool is_directory(const char* path) {
   struct stat st;
   return (0 == stat(path, &st)) && (st.st_mode & S_IFDIR);
 }
 
-bool check_directory(std::string &path)
-{
-  while (!path.empty() && path.back() == '/')
-    path.erase(path.size() - 1, 1);
+bool check_directory(std::string& path) {
+  while (!path.empty() && path.back() == '/') path.erase(path.size() - 1, 1);
 
   int len = path.size();
 
@@ -166,8 +157,7 @@ bool check_directory(std::string &path)
   return true;
 }
 
-int list_file(const char *path, const char *filter_pattern, std::vector<std::string> &files)
-{
+int list_file(const char* path, const char* filter_pattern, std::vector<std::string>& files) {
   regex_t reg;
   if (filter_pattern) {
     const int res = regcomp(&reg, filter_pattern, REG_NOSUB);
@@ -179,7 +169,7 @@ int list_file(const char *path, const char *filter_pattern, std::vector<std::str
     }
   }
 
-  DIR *pdir = opendir(path);
+  DIR* pdir = opendir(path);
   if (!pdir) {
     if (filter_pattern)
       regfree(&reg);
@@ -190,7 +180,7 @@ int list_file(const char *path, const char *filter_pattern, std::vector<std::str
   files.clear();
 
   struct dirent entry;
-  struct dirent *pentry = NULL;
+  struct dirent* pentry = NULL;
   char tmp_path[PATH_MAX];
   while ((0 == readdir_r(pdir, &entry, &pentry)) && (NULL != pentry)) {
     if ('.' == entry.d_name[0])  // 跳过./..文件和隐藏文件

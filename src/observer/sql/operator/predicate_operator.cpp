@@ -18,8 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/filter_stmt.h"
 #include "storage/common/field.h"
 
-RC PredicateOperator::open()
-{
+RC PredicateOperator::open() {
   if (children_.size() != 1) {
     LOG_WARN("predicate operator must has one child");
     return RC::INTERNAL;
@@ -28,46 +27,42 @@ RC PredicateOperator::open()
   return children_[0]->open();
 }
 
-RC PredicateOperator::next()
-{
+RC PredicateOperator::next() {
   RC rc = RC::SUCCESS;
-  Operator *oper = children_[0];
-  
+  Operator* oper = children_[0];
+
   while (RC::SUCCESS == (rc = oper->next())) {
-    Tuple *tuple = oper->current_tuple();
+    Tuple* tuple = oper->current_tuple();
     if (nullptr == tuple) {
       rc = RC::INTERNAL;
       LOG_WARN("failed to get tuple from operator");
       break;
     }
 
-    if (do_predicate(static_cast<RowTuple &>(*tuple))) {
+    if (do_predicate(static_cast<RowTuple&>(*tuple))) {
       return rc;
     }
   }
   return rc;
 }
 
-RC PredicateOperator::close()
-{
+RC PredicateOperator::close() {
   children_[0]->close();
   return RC::SUCCESS;
 }
 
-Tuple * PredicateOperator::current_tuple()
-{
+Tuple* PredicateOperator::current_tuple() {
   return children_[0]->current_tuple();
 }
 
-bool PredicateOperator::do_predicate(RowTuple &tuple)
-{
+bool PredicateOperator::do_predicate(RowTuple& tuple) {
   if (filter_stmt_ == nullptr || filter_stmt_->filter_units().empty()) {
     return true;
   }
 
-  for (const FilterUnit *filter_unit : filter_stmt_->filter_units()) {
-    Expression *left_expr = filter_unit->left();
-    Expression *right_expr = filter_unit->right();
+  for (const FilterUnit* filter_unit : filter_stmt_->filter_units()) {
+    Expression* left_expr = filter_unit->left();
+    Expression* right_expr = filter_unit->right();
     CompOp comp = filter_unit->comp();
     TupleCell left_cell;
     TupleCell right_cell;
@@ -77,27 +72,27 @@ bool PredicateOperator::do_predicate(RowTuple &tuple)
     const int compare = left_cell.compare(right_cell);
     bool filter_result = false;
     switch (comp) {
-    case EQUAL_TO: {
-      filter_result = (0 == compare); 
-    } break;
-    case LESS_EQUAL: {
-      filter_result = (compare <= 0); 
-    } break;
-    case NOT_EQUAL: {
-      filter_result = (compare != 0);
-    } break;
-    case LESS_THAN: {
-      filter_result = (compare < 0);
-    } break;
-    case GREAT_EQUAL: {
-      filter_result = (compare >= 0);
-    } break;
-    case GREAT_THAN: {
-      filter_result = (compare > 0);
-    } break;
-    default: {
-      LOG_WARN("invalid compare type: %d", comp);
-    } break;
+      case EQUAL_TO: {
+        filter_result = (0 == compare);
+      } break;
+      case LESS_EQUAL: {
+        filter_result = (compare <= 0);
+      } break;
+      case NOT_EQUAL: {
+        filter_result = (compare != 0);
+      } break;
+      case LESS_THAN: {
+        filter_result = (compare < 0);
+      } break;
+      case GREAT_EQUAL: {
+        filter_result = (compare >= 0);
+      } break;
+      case GREAT_THAN: {
+        filter_result = (compare > 0);
+      } break;
+      default: {
+        LOG_WARN("invalid compare type: %d", comp);
+      } break;
     }
     if (!filter_result) {
       return false;

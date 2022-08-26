@@ -341,6 +341,6 @@ enum RC {
   AUTH_USER = (AUTH | (RCAuth::USER << 8)),
 };
 
-extern const char *strrc(RC rc);
+extern const char* strrc(RC rc);
 
 #endif  //__OBSERVER_RC_H__

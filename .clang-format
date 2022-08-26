@@ -2,12 +2,12 @@
 Language: Cpp
 # BasedOnStyle:	LLVM
 SortIncludes: false
-AccessModifierOffset: -2
+AccessModifierOffset: -1
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 DerivePointerAlignment: false
-PointerAlignment: Right
+PointerAlignment: Left
 ConstructorInitializerIndentWidth: 4
 AlignEscapedNewlinesLeft: true
 AlignTrailingComments: true
@@ -16,7 +16,7 @@ AllowShortBlocksOnASingleLine: true
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
 AlwaysBreakBeforeMultilineStrings: false
@@ -51,7 +51,7 @@ BraceWrapping:
   AfterClass:      false
   AfterControlStatement: false
   AfterEnum:       false
-  AfterFunction:   true
+  AfterFunction:   false
   AfterNamespace:  false
   AfterObjCDeclaration: false
   AfterStruct:     false
@@ -71,6 +71,9 @@ SpacesInCStyleCastParentheses: false
 SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpacesBeforeTrailingComments: 2
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeRangeBasedForLoopColon: true
 ContinuationIndentWidth: 4
 CommentPragmas:  '^lint'
 MacroBlockBegin: "

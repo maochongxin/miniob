@@ -20,12 +20,10 @@ See the Mulan PSL v2 for more details. */
 
 class Table;
 
-class TableScanOperator : public Operator
-{
-public:
-  TableScanOperator(Table *table)
-    : table_(table)
-  {}
+class TableScanOperator : public Operator {
+ public:
+  TableScanOperator(Table* table) : table_(table) {
+  }
 
   virtual ~TableScanOperator() = default;
 
@@ -33,7 +31,7 @@ public:
   RC next() override;
   RC close() override;
 
-  Tuple * current_tuple() override;
+  Tuple* current_tuple() override;
 
   // int tuple_cell_num() const override
   // {
@@ -41,8 +39,8 @@ public:
   // }
 
   // RC tuple_cell_spec_at(int index, TupleCellSpec &spec) const override;
-private:
-  Table *table_ = nullptr;
+ private:
+  Table* table_ = nullptr;
   RecordFileScanner record_scanner_;
   Record current_record_;
   RowTuple tuple_;

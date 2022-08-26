@@ -25,8 +25,7 @@ namespace common {
  *
  * @post  Call never returns.  Thread is killed.  Pool is notified.
  */
-void KillThreadStage::handle_event(StageEvent *event)
-{
+void KillThreadStage::handle_event(StageEvent* event) {
   get_pool()->thread_kill();
   event->done();
   this->release_event();
@@ -39,13 +38,11 @@ void KillThreadStage::handle_event(StageEvent *event)
  * @post initializing the class members
  * @return the class object
  */
-Stage *KillThreadStage::make_stage(const std::string &tag)
-{
+Stage* KillThreadStage::make_stage(const std::string& tag) {
   return new KillThreadStage(tag.c_str());
 }
 
-bool KillThreadStage::set_properties()
-{
+bool KillThreadStage::set_properties() {
   // nothing to do
   return true;
 }

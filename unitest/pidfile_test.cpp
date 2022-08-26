@@ -21,17 +21,16 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-int main()
-{
+int main() {
   long long pid = (long long)getpid();
 
-  const char *programName = "test";
+  const char* programName = "test";
   writePidFile(programName);
 
   std::string pidFile = getPidPath();
 
   char buf[1024] = {0};
-  char *p = buf;
+  char* p = buf;
   size_t size = 0;
   readFromFile(pidFile, p, size);
 

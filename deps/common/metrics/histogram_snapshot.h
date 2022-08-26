@@ -26,13 +26,13 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 class HistogramSnapShot : public Snapshot {
-public:
+ public:
   HistogramSnapShot();
-  explicit HistogramSnapShot(const std::vector<double> &collection);
+  explicit HistogramSnapShot(const std::vector<double>& collection);
   virtual ~HistogramSnapShot();
 
-public:
-  void set_collection(const std::vector<double> &collection);
+ public:
+  void set_collection(const std::vector<double>& collection);
 
   /**
    * Returns the value at the given quantile
@@ -62,11 +62,11 @@ public:
   double get_min();
   double get_mean();
 
-  const std::vector<double> &get_values();
+  const std::vector<double>& get_values();
 
   std::string to_string();
 
-protected:
+ protected:
   std::vector<double> data_;
 };
 

@@ -44,10 +44,10 @@ namespace common {
 
 class SedaConfig {
 
-public:
+ public:
   typedef enum { SUCCESS = 0, INITFAIL, PARSEFAIL } status_t;
 
-  static SedaConfig *&get_instance();
+  static SedaConfig*& get_instance();
 
   /**
    * Destructor
@@ -60,14 +60,14 @@ public:
    * @pre  filename is a null-terminated string, or \c NULL
    * @post config filename is initialized, config string is empty
    */
-  void set_cfg_filename(const char *filename);
+  void set_cfg_filename(const char* filename);
 
   /**
    * Set the string holding the configuration
    * @pre  config_str is a null-terminated string, or \c NULL
    * @post config string is initialized, config filename is empty
    */
-  void set_cfg_string(const char *config_str);
+  void set_cfg_string(const char* config_str);
 
   /**
    * Parse config file or string
@@ -129,7 +129,7 @@ public:
    * @pre
    * @return a reference to the Stage
    */
-  Stage *get_stage(const char *stagename);
+  Stage* get_stage(const char* stagename);
 
   /**
    * get the desired threadpool a string
@@ -138,25 +138,25 @@ public:
    * @pre
    * @return a reference to the ThreadPool
    */
-  Threadpool &get_thread_pool(const int index);
+  Threadpool& get_thread_pool(const int index);
 
   /**
    * Get a list of all stage names
    * @param[in/out] names   names of all stages_
    */
-  void get_stage_names(std::vector<std::string> &names) const;
+  void get_stage_names(std::vector<std::string>& names) const;
 
   /**
    * Query the number of queued events at each stage.
    * @param[in/out] stats   number of events enqueued at each
    *   stage.
    */
-  void get_stage_queue_status(std::vector<int> &stats) const;
+  void get_stage_queue_status(std::vector<int>& stats) const;
 
-  std::map<std::string, Stage *>::iterator begin();
-  std::map<std::string, Stage *>::iterator end();
+  std::map<std::string, Stage*>::iterator begin();
+  std::map<std::string, Stage*>::iterator end();
 
-private:
+ private:
   // Constructor
   SedaConfig();
 
@@ -172,7 +172,7 @@ private:
 
   status_t init_thread_pool();
 
-  std::string get_thread_pool(std::string &stage_name);
+  std::string get_thread_pool(std::string& stage_name);
 
   status_t init_stages();
   status_t gen_next_stages();
@@ -190,32 +190,29 @@ private:
    */
   void init_event_history();
 
-  SedaConfig &operator=(const SedaConfig &cevtout);
+  SedaConfig& operator=(const SedaConfig& cevtout);
 
-  static SedaConfig *instance_;
+  static SedaConfig* instance_;
 
   // In old logic, SedaConfig will parse seda configure file
   // but here, only one configure file
   std::string cfg_file_;
   std::string cfg_str_;
 
-  std::map<std::string, Threadpool *> thread_pools_;
-  std::map<std::string, Stage *> stages_;
+  std::map<std::string, Threadpool*> thread_pools_;
+  std::map<std::string, Stage*> stages_;
   std::vector<std::string> stage_names_;
 };
 
-inline std::map<std::string, Stage *>::iterator SedaConfig::begin()
-{
+inline std::map<std::string, Stage*>::iterator SedaConfig::begin() {
   return stages_.begin();
 }
 
-inline std::map<std::string, Stage *>::iterator SedaConfig::end()
-{
+inline std::map<std::string, Stage*>::iterator SedaConfig::end() {
   return stages_.end();
 }
 
-inline Stage *SedaConfig::get_stage(const char *stagename)
-{
+inline Stage* SedaConfig::get_stage(const char* stagename) {
   if (stagename) {
     std::string sname(stagename);
     return stages_[stagename];
@@ -224,10 +221,10 @@ inline Stage *SedaConfig::get_stage(const char *stagename)
 }
 
 // Global seda config object
-SedaConfig *&get_seda_config();
+SedaConfig*& get_seda_config();
 
-bool &get_event_history_flag();
-u32_t &get_max_event_hops();
+bool& get_event_history_flag();
+u32_t& get_max_event_hops();
 
 }  // namespace common
 #endif  //__COMMON_SEDA_SEDA_CONFIG_H__

@@ -20,29 +20,29 @@ class Trx;
 class Db;
 
 class Session {
-public:
+ public:
   // static Session &current();
-  static Session &default_session();
+  static Session& default_session();
 
-public:
+ public:
   Session() = default;
   ~Session();
 
-  Session(const Session &other);
-  void operator=(Session &) = delete;
+  Session(const Session& other);
+  void operator=(Session&) = delete;
 
-  const char *get_current_db_name() const;
-  Db *get_current_db() const;
+  const char* get_current_db_name() const;
+  Db* get_current_db() const;
 
-  void set_current_db(const std::string &dbname);
+  void set_current_db(const std::string& dbname);
 
   void set_trx_multi_operation_mode(bool multi_operation_mode);
   bool is_trx_multi_operation_mode() const;
 
-  Trx *current_trx();
+  Trx* current_trx();
 
-private:
-  Db *db_ = nullptr;
-  Trx *trx_ = nullptr;
+ private:
+  Db* db_ = nullptr;
+  Trx* trx_ = nullptr;
   bool trx_multi_operation_mode_ = false;  // 当前事务的模式，是否多语句模式. 单语句模式自动提交
 };

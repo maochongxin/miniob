@@ -59,37 +59,37 @@ class CompletionCallback {
 
   // public interface operations
 
-public:
+ public:
   // Constructor
-  CompletionCallback(Stage *trgt, CallbackContext *ctx = NULL);
+  CompletionCallback(Stage* trgt, CallbackContext* ctx = NULL);
 
   // Destructor
   virtual ~CompletionCallback();
 
   // Push onto a callback stack
-  void push_callback(CompletionCallback *stack);
+  void push_callback(CompletionCallback* stack);
 
   /**
    * Pop off of a callback stack
    * @returns  remainder of callback stack
    */
-  CompletionCallback *pop_callback();
+  CompletionCallback* pop_callback();
 
   // One event is complete
-  void event_done(StageEvent *ev);
+  void event_done(StageEvent* ev);
 
   // Reschedule this event as a callback on the target stage
-  void event_reschedule(StageEvent *ev);
+  void event_reschedule(StageEvent* ev);
 
   // Complete this event if it has timed out
-  void event_timeout(StageEvent *ev);
+  void event_timeout(StageEvent* ev);
 
-protected:
+ protected:
   // implementation state
 
-  Stage *target_stage_;          // stage which is setting this callback
-  CallbackContext *context_;     // argument to pass when invoking cb
-  CompletionCallback *next_cb_;  // next event in the chain
+  Stage* target_stage_;          // stage which is setting this callback
+  CallbackContext* context_;     // argument to pass when invoking cb
+  CompletionCallback* next_cb_;  // next event in the chain
   bool ev_hist_flag_;            // true if event histories are enabled
 };
 
@@ -101,24 +101,23 @@ protected:
  *  callback context class from this base.
  */
 class CallbackContext {
-public:
-  virtual ~CallbackContext()
-  {}
+ public:
+  virtual ~CallbackContext() {
+  }
 };
 
 class CallbackContextEvent : public CallbackContext {
-public:
-  CallbackContextEvent(StageEvent *event = NULL) : ev_(event)
-  {}
-  ~CallbackContextEvent()
-  {}
-  StageEvent *get_event()
-  {
+ public:
+  CallbackContextEvent(StageEvent* event = NULL) : ev_(event) {
+  }
+  ~CallbackContextEvent() {
+  }
+  StageEvent* get_event() {
     return ev_;
   }
 
-private:
-  StageEvent *ev_;
+ private:
+  StageEvent* ev_;
 };
 
 }  // namespace common

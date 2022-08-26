@@ -31,7 +31,7 @@ class Trx;
 
 // TODO remove the routines with condition
 class Table {
-public:
+ public:
   Table() = default;
   ~Table();
 
@@ -43,77 +43,76 @@ public:
    * @param attribute_count 字段个数
    * @param attributes 字段
    */
-  RC create(const char *path, const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]);
+  RC create(const char* path, const char* name, const char* base_dir, int attribute_count, const AttrInfo attributes[]);
 
   /**
    * 打开一个表
    * @param meta_file 保存表元数据的文件完整路径
    * @param base_dir 表所在的文件夹，表记录数据文件、索引数据文件存放位置
    */
-  RC open(const char *meta_file, const char *base_dir);
+  RC open(const char* meta_file, const char* base_dir);
 
-  RC insert_record(Trx *trx, int value_num, const Value *values);
-  RC update_record(Trx *trx, const char *attribute_name, const Value *value, int condition_num,
-      const Condition conditions[], int *updated_count);
-  RC delete_record(Trx *trx, ConditionFilter *filter, int *deleted_count);
-  RC delete_record(Trx *trx, Record *record);
+  RC insert_record(Trx* trx, int value_num, const Value* values);
+  RC update_record(Trx* trx, const char* attribute_name, const Value* value, int condition_num,
+      const Condition conditions[], int* updated_count);
+  RC delete_record(Trx* trx, ConditionFilter* filter, int* deleted_count);
+  RC delete_record(Trx* trx, Record* record);
 
-  RC scan_record(Trx *trx, ConditionFilter *filter, int limit, void *context,
-      void (*record_reader)(const char *data, void *context));
+  RC scan_record(Trx* trx, ConditionFilter* filter, int limit, void* context,
+      void (*record_reader)(const char* data, void* context));
 
-  RC create_index(Trx *trx, const char *index_name, const char *attribute_name);
+  RC create_index(Trx* trx, const char* index_name, const char* attribute_name);
 
-  RC get_record_scanner(RecordFileScanner &scanner);
+  RC get_record_scanner(RecordFileScanner& scanner);
 
-  RecordFileHandler *record_handler() const
-  {
+  RecordFileHandler* record_handler() const {
     return record_handler_;
   }
 
-public:
-  const char *name() const;
+ public:
+  const char* name() const;
 
-  const TableMeta &table_meta() const;
+  const TableMeta& table_meta() const;
 
   RC sync();
 
-public:
-  RC commit_insert(Trx *trx, const RID &rid);
-  RC commit_delete(Trx *trx, const RID &rid);
-  RC rollback_insert(Trx *trx, const RID &rid);
-  RC rollback_delete(Trx *trx, const RID &rid);
+ public:
+  RC commit_insert(Trx* trx, const RID& rid);
+  RC commit_delete(Trx* trx, const RID& rid);
+  RC rollback_insert(Trx* trx, const RID& rid);
+  RC rollback_delete(Trx* trx, const RID& rid);
 
-private:
+ private:
   RC scan_record(
-      Trx *trx, ConditionFilter *filter, int limit, void *context, RC (*record_reader)(Record *record, void *context));
-  RC scan_record_by_index(Trx *trx, IndexScanner *scanner, ConditionFilter *filter, int limit, void *context,
-      RC (*record_reader)(Record *record, void *context));
-  IndexScanner *find_index_for_scan(const ConditionFilter *filter);
-  IndexScanner *find_index_for_scan(const DefaultConditionFilter &filter);
+      Trx* trx, ConditionFilter* filter, int limit, void* context, RC (*record_reader)(Record* record, void* context));
+  RC scan_record_by_index(Trx* trx, IndexScanner* scanner, ConditionFilter* filter, int limit, void* context,
+      RC (*record_reader)(Record* record, void* context));
+  IndexScanner* find_index_for_scan(const ConditionFilter* filter);
+  IndexScanner* find_index_for_scan(const DefaultConditionFilter& filter);
 
-  RC insert_record(Trx *trx, Record *record);
+  RC insert_record(Trx* trx, Record* record);
 
-private:
+ private:
   friend class RecordUpdater;
   friend class RecordDeleter;
 
-  RC insert_entry_of_indexes(const char *record, const RID &rid);
-  RC delete_entry_of_indexes(const char *record, const RID &rid, bool error_on_not_exists);
+  RC insert_entry_of_indexes(const char* record, const RID& rid);
+  RC delete_entry_of_indexes(const char* record, const RID& rid, bool error_on_not_exists);
 
-private:
-  RC init_record_handler(const char *base_dir);
-  RC make_record(int value_num, const Value *values, char *&record_out);
+ private:
+  RC init_record_handler(const char* base_dir);
+  RC make_record(int value_num, const Value* values, char*& record_out);
 
-public:
-  Index *find_index(const char *index_name) const;
-  Index *find_index_by_field(const char *field_name) const;
+ public:
+  Index* find_index(const char* index_name) const;
+  Index* find_index_by_field(const char* field_name) const;
 
-private:
+ private:
   std::string base_dir_;
   TableMeta table_meta_;
-  DiskBufferPool *data_buffer_pool_ = nullptr;  /// 数据文件关联的buffer pool
-  RecordFileHandler *record_handler_ = nullptr;  /// 记录操作
-  std::vector<Index *> indexes_;
+  DiskBufferPool* data_buffer_pool_ = nullptr;   /// 数据文件关联的buffer pool
+  RecordFileHandler* record_handler_ = nullptr;  /// 记录操作
+  std::vector<Index*> indexes_;
 };
 
 #endif  // __OBSERVER_STORAGE_COMMON_TABLE_H__

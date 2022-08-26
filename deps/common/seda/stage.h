@@ -89,7 +89,7 @@ class Stage {
 
   // public interface operations
 
-public:
+ public:
   /**
    * Destructor
    * @pre  stage is not connected
@@ -103,14 +103,13 @@ public:
    * @post initializing the class members
    * @return Stage instantiated object
    */
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
   /**
    * Return the Threadpool object
    * @return reference to the Threadpool for this Stage
    */
-  Threadpool *get_pool()
-  {
+  Threadpool* get_pool() {
     return th_pool_;
   }
 
@@ -121,13 +120,13 @@ public:
    * @pre  stage not connected
    * @post added a new stage
    */
-  void push_stage(Stage *);
+  void push_stage(Stage*);
 
   /**
    * Get name of the stage
    * @return return the name of this stage which is the class name
    */
-  const char *get_name();
+  const char* get_name();
 
   /**
    * Set threadpool
@@ -136,7 +135,7 @@ public:
    * @pre  stage not connected
    * @post seed threadpool for this stage
    */
-  void set_pool(Threadpool *);
+  void set_pool(Threadpool*);
 
   /**
    * Connect this stage to pipeline and threadpool
@@ -180,7 +179,7 @@ public:
    * @post event must not be de-referenced by caller after return
    * @post event ref count on stage is incremented
    */
-  void add_event(StageEvent *event);
+  void add_event(StageEvent* event);
 
   /**
    * Query length of queue
@@ -198,8 +197,7 @@ public:
    * Query whether stage is connected
    * @return true if stage is connected
    */
-  bool is_connected() const
-  {
+  bool is_connected() const {
     return connected_;
   }
 
@@ -213,7 +211,7 @@ public:
    *
    * @post  event must not be de-referenced by caller after return
    */
-  virtual void handle_event(StageEvent *event) = 0;
+  virtual void handle_event(StageEvent* event) = 0;
 
   /**
    * Perform Stage-specific callback processing for an event
@@ -222,20 +220,19 @@ public:
    *
    * @param[in] event Pointer to event that initiated the callback.
    */
-  virtual void callback_event(StageEvent *event, CallbackContext *context) = 0;
+  virtual void callback_event(StageEvent* event, CallbackContext* context) = 0;
 
   /**
    * Perform Stage-specific callback processing for a timed out event
    * A stage only need to implement this interface if the down-stream
    * stages support event timeout detection.
    */
-  virtual void timeout_event(StageEvent *event, CallbackContext *context)
-  {
+  virtual void timeout_event(StageEvent* event, CallbackContext* context) {
     LOG_INFO("get a timed out evnet in %s timeout_event\n", stage_name_);
     this->callback_event(event, context);
   }
 
-protected:
+ protected:
   /**
    * Constructor
    * @param[in] tag     The label that identifies this stage.
@@ -244,7 +241,7 @@ protected:
    * @post event queue is empty
    * @post stage is not connected
    */
-  Stage(const char *tag);
+  Stage(const char* tag);
 
   /**
    * Remove an event from the queue. Called only by service thread.
@@ -253,7 +250,7 @@ protected:
    * @return first event on queue.
    * @post  first event on queue is removed from queue.
    */
-  StageEvent *remove_event();
+  StageEvent* remove_event();
 
   /**
    * Release event reference on stage.  Called only by service thread.
@@ -271,8 +268,7 @@ protected:
    * @pre  Stage not connected
    * @return TRUE if and only if outputs are valid and init succeeded.
    */
-  virtual bool initialize()
-  {
+  virtual bool initialize() {
     return true;
   }
 
@@ -282,8 +278,7 @@ protected:
    * @post initializing the class members
    * @return Stage instantiated object
    */
-  virtual bool set_properties()
-  {
+  virtual bool set_properties() {
     return true;
   }
 
@@ -294,8 +289,7 @@ protected:
    *  from the pipeline.  Most stages will not need to implement
    *  this function.
    */
-  virtual void disconnect_prepare()
-  {
+  virtual void disconnect_prepare() {
     return;
   }
 
@@ -304,44 +298,40 @@ protected:
    * After disconnection is completed, cleanup any resources held by the
    * stage and prepare for destruction or re-initialization.
    */
-  virtual void cleanup()
-  {
+  virtual void cleanup() {
     return;
   }
 
   // pipeline state
-  std::list<Stage *> next_stage_list_;  // next stage(s) in the pipeline
+  std::list<Stage*> next_stage_list_;  // next stage(s) in the pipeline
 
   // implementation state
-  char *stage_name_;  // name of stage
+  char* stage_name_;  // name of stage
 
   friend class Threadpool;
 
-private:
-  std::deque<StageEvent *> event_list_;  // event queue
-  mutable pthread_mutex_t list_mutex_;   // protects the event queue
-  pthread_cond_t disconnect_cond_;       // wait here for disconnect
-  bool connected_;                       // is stage connected to pool?
-  unsigned long event_ref_;              // # of outstanding events
-  Threadpool *th_pool_ = nullptr;        // Threadpool for this stage
+ private:
+  std::deque<StageEvent*> event_list_;  // event queue
+  mutable pthread_mutex_t list_mutex_;  // protects the event queue
+  pthread_cond_t disconnect_cond_;      // wait here for disconnect
+  bool connected_;                      // is stage connected to pool?
+  unsigned long event_ref_;             // # of outstanding events
+  Threadpool* th_pool_ = nullptr;       // Threadpool for this stage
 };
 
-inline void Stage::set_pool(Threadpool *th)
-{
+inline void Stage::set_pool(Threadpool* th) {
   ASSERT((th != NULL), "threadpool not available for stage %s", this->get_name());
   ASSERT(!connected_, "attempt to set threadpool while connected: %s", this->get_name());
   th_pool_ = th;
 }
 
-inline void Stage::push_stage(Stage *st)
-{
+inline void Stage::push_stage(Stage* st) {
   ASSERT((st != NULL), "next stage not available for stage %s", this->get_name());
   ASSERT(!connected_, "attempt to set push stage while connected: %s", this->get_name());
   next_stage_list_.push_back(st);
 }
 
-inline const char *Stage::get_name()
-{
+inline const char* Stage::get_name() {
   return stage_name_;
 }
 

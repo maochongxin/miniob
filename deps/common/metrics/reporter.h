@@ -21,8 +21,8 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 class Reporter {
-public:
-  virtual void report(const std::string &tag, Metric *metric) = 0;
+ public:
+  virtual void report(const std::string& tag, Metric* metric) = 0;
 };
 }  // namespace common
 #endif  //__COMMON_METRICS_REPORTER_H__

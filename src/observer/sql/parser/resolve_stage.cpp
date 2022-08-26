@@ -30,17 +30,16 @@ See the Mulan PSL v2 for more details. */
 using namespace common;
 
 //! Constructor
-ResolveStage::ResolveStage(const char *tag) : Stage(tag)
-{}
+ResolveStage::ResolveStage(const char* tag) : Stage(tag) {
+}
 
 //! Destructor
-ResolveStage::~ResolveStage()
-{}
+ResolveStage::~ResolveStage() {
+}
 
 //! Parse properties, instantiate a stage object
-Stage *ResolveStage::make_stage(const std::string &tag)
-{
-  ResolveStage *stage = new (std::nothrow) ResolveStage(tag.c_str());
+Stage* ResolveStage::make_stage(const std::string& tag) {
+  ResolveStage* stage = new (std::nothrow) ResolveStage(tag.c_str());
   if (stage == nullptr) {
     LOG_ERROR("new ResolveStage failed");
     return nullptr;
@@ -50,8 +49,7 @@ Stage *ResolveStage::make_stage(const std::string &tag)
 }
 
 //! Set properties for this object set in stage specific properties
-bool ResolveStage::set_properties()
-{
+bool ResolveStage::set_properties() {
   //  std::string stageNameStr(stage_name_);
   //  std::map<std::string, std::string> section = g_properties()->get(
   //    stageNameStr);
@@ -64,11 +62,10 @@ bool ResolveStage::set_properties()
 }
 
 //! Initialize stage params and validate outputs
-bool ResolveStage::initialize()
-{
+bool ResolveStage::initialize() {
   LOG_TRACE("Enter");
 
-  std::list<Stage *>::iterator stgp = next_stage_list_.begin();
+  std::list<Stage*>::iterator stgp = next_stage_list_.begin();
   query_cache_stage_ = *(stgp++);
 
   LOG_TRACE("Exit");
@@ -76,33 +73,31 @@ bool ResolveStage::initialize()
 }
 
 //! Cleanup after disconnection
-void ResolveStage::cleanup()
-{
+void ResolveStage::cleanup() {
   LOG_TRACE("Enter");
 
   LOG_TRACE("Exit");
 }
 
-void ResolveStage::handle_event(StageEvent *event)
-{
+void ResolveStage::handle_event(StageEvent* event) {
   LOG_TRACE("Enter\n");
 
-  SQLStageEvent *sql_event = static_cast<SQLStageEvent *>(event);
+  SQLStageEvent* sql_event = static_cast<SQLStageEvent*>(event);
   if (nullptr == sql_event) {
     LOG_WARN("failed to get sql stage event");
     return;
   }
 
-  SessionEvent *session_event = sql_event->session_event();
+  SessionEvent* session_event = sql_event->session_event();
 
-  Db *db = session_event->session()->get_current_db();
+  Db* db = session_event->session()->get_current_db();
   if (nullptr == db) {
     LOG_ERROR("cannot current db");
-    return ;
+    return;
   }
 
-  Query *query = sql_event->query();
-  Stmt *stmt = nullptr;
+  Query* query = sql_event->query();
+  Stmt* stmt = nullptr;
   RC rc = Stmt::create_stmt(db, *query, stmt);
   if (rc != RC::SUCCESS && rc != RC::UNIMPLENMENT) {
     LOG_WARN("failed to create stmt. rc=%d:%s", rc, strrc(rc));
@@ -118,8 +113,7 @@ void ResolveStage::handle_event(StageEvent *event)
   return;
 }
 
-void ResolveStage::callback_event(StageEvent *event, CallbackContext *context)
-{
+void ResolveStage::callback_event(StageEvent* event, CallbackContext* context) {
   LOG_TRACE("Enter\n");
 
   LOG_TRACE("Exit\n");

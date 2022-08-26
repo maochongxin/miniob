@@ -34,8 +34,7 @@ namespace common {
  * @post event queue is empty
  * @post stage is not connected
  */
-Stage::Stage(const char *tag) : next_stage_list_(), event_list_(), connected_(false), event_ref_(0)
-{
+Stage::Stage(const char* tag) : next_stage_list_(), event_list_(), connected_(false), event_ref_(0) {
   LOG_TRACE("%s", "enter");
   assert(tag != NULL);
 
@@ -51,8 +50,7 @@ Stage::Stage(const char *tag) : next_stage_list_(), event_list_(), connected_(fa
  * @pre  stage is not connected
  * @post pending events are deleted and stage is destroyed
  */
-Stage::~Stage()
-{
+Stage::~Stage() {
   LOG_TRACE("%s", "enter");
   assert(!connected_);
   MUTEX_LOCK(&list_mutex_);
@@ -85,8 +83,7 @@ Stage::~Stage()
  * @post th_pool_ == pool
  * @return true if the connection succeeded, else false
  */
-bool Stage::connect()
-{
+bool Stage::connect() {
   LOG_TRACE("%s%s", "enter", stage_name_);
   assert(!connected_);
   assert(th_pool_ != NULL);
@@ -127,17 +124,14 @@ bool Stage::connect()
  * @post   th_pool_ NULL
  * @post   stage is not connected
  */
-void Stage::disconnect()
-{
+void Stage::disconnect() {
   assert(connected_ == true);
 
   LOG_TRACE("%s%s", "enter", stage_name_);
   MUTEX_LOCK(&list_mutex_);
   disconnect_prepare();
   connected_ = false;
-  while (event_ref_ > 0) {
-    COND_WAIT(&disconnect_cond_, &list_mutex_);
-  }
+  while (event_ref_ > 0) { COND_WAIT(&disconnect_cond_, &list_mutex_); }
   th_pool_ = NULL;
   next_stage_list_.clear();
   cleanup();
@@ -153,8 +147,7 @@ void Stage::disconnect()
  * @post event added to the end of event queue
  * @post event must not be de-referenced by caller after return
  */
-void Stage::add_event(StageEvent *event)
-{
+void Stage::add_event(StageEvent* event) {
   assert(event != NULL);
 
   MUTEX_LOCK(&list_mutex_);
@@ -177,8 +170,7 @@ void Stage::add_event(StageEvent *event)
  * Query length of queue
  * @return length of event queue.
  */
-unsigned long Stage::qlen() const
-{
+unsigned long Stage::qlen() const {
   unsigned long res;
 
   MUTEX_LOCK(&list_mutex_);
@@ -191,8 +183,7 @@ unsigned long Stage::qlen() const
  * Query whether the queue is empty
  * @return \c true if the queue is empty; \c false otherwise
  */
-bool Stage::qempty() const
-{
+bool Stage::qempty() const {
   bool empty = false;
 
   MUTEX_LOCK(&list_mutex_);
@@ -208,13 +199,12 @@ bool Stage::qempty() const
  * @return first event on queue.
  * @post  first event on queue is removed from queue.
  */
-StageEvent *Stage::remove_event()
-{
+StageEvent* Stage::remove_event() {
   MUTEX_LOCK(&list_mutex_);
 
   assert(!event_list_.empty());
 
-  StageEvent *se = *(event_list_.begin());
+  StageEvent* se = *(event_list_.begin());
   event_list_.pop_front();
   MUTEX_UNLOCK(&list_mutex_);
 
@@ -226,8 +216,7 @@ StageEvent *Stage::remove_event()
  *
  * @post event ref count on stage is decremented
  */
-void Stage::release_event()
-{
+void Stage::release_event() {
   MUTEX_LOCK(&list_mutex_);
   event_ref_--;
   if (!connected_ && event_ref_ == 0) {

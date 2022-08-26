@@ -27,14 +27,13 @@ namespace common {
 const std::string Ini::DEFAULT_SECTION = std::string("");
 const std::map<std::string, std::string> Ini::empty_map_;
 
-Ini::Ini()
-{}
+Ini::Ini() {
+}
 
-Ini::~Ini()
-{}
+Ini::~Ini() {
+}
 
-void Ini::insert_session(const std::string &session_name)
-{
+void Ini::insert_session(const std::string& session_name) {
   std::map<std::string, std::string> session_map;
   std::pair<std::string, std::map<std::string, std::string>> entry =
       std::pair<std::string, std::map<std::string, std::string>>(session_name, session_map);
@@ -42,8 +41,7 @@ void Ini::insert_session(const std::string &session_name)
   sections_.insert(entry);
 }
 
-std::map<std::string, std::string> *Ini::switch_session(const std::string &session_name)
-{
+std::map<std::string, std::string>* Ini::switch_session(const std::string& session_name) {
   SessionsMap::iterator it = sections_.find(session_name);
   if (it != sections_.end()) {
     return &it->second;
@@ -60,8 +58,7 @@ std::map<std::string, std::string> *Ini::switch_session(const std::string &sessi
   return nullptr;
 }
 
-const std::map<std::string, std::string> &Ini::get(const std::string &section)
-{
+const std::map<std::string, std::string>& Ini::get(const std::string& section) {
   SessionsMap::iterator it = sections_.find(section);
   if (it == sections_.end()) {
     return empty_map_;
@@ -70,8 +67,7 @@ const std::map<std::string, std::string> &Ini::get(const std::string &section)
   return it->second;
 }
 
-std::string Ini::get(const std::string &key, const std::string &defaultValue, const std::string &section)
-{
+std::string Ini::get(const std::string& key, const std::string& defaultValue, const std::string& section) {
   std::map<std::string, std::string> section_map = get(section);
 
   std::map<std::string, std::string>::iterator it = section_map.find(key);
@@ -82,17 +78,15 @@ std::string Ini::get(const std::string &key, const std::string &defaultValue, co
   return it->second;
 }
 
-int Ini::put(const std::string &key, const std::string &value, const std::string &section)
-{
-  std::map<std::string, std::string> *section_map = switch_session(section);
+int Ini::put(const std::string& key, const std::string& value, const std::string& section) {
+  std::map<std::string, std::string>* section_map = switch_session(section);
 
   section_map->insert(std::pair<std::string, std::string>(key, value));
 
   return 0;
 }
 
-int Ini::insert_entry(std::map<std::string, std::string> *session_map, const std::string &line)
-{
+int Ini::insert_entry(std::map<std::string, std::string>* session_map, const std::string& line) {
   if (session_map == nullptr) {
     std::cerr << __FILE__ << __FUNCTION__ << " session map is null" << std::endl;
     return -1;
@@ -114,15 +108,14 @@ int Ini::insert_entry(std::map<std::string, std::string> *session_map, const std
   return 0;
 }
 
-int Ini::load(const std::string &file_name)
-{
+int Ini::load(const std::string& file_name) {
   std::ifstream ifs;
 
   try {
 
     bool continue_last_line = false;
 
-    std::map<std::string, std::string> *current_session = switch_session(DEFAULT_SECTION);
+    std::map<std::string, std::string>* current_session = switch_session(DEFAULT_SECTION);
 
     char line[MAX_CFG_LINE_LEN];
 
@@ -135,7 +128,7 @@ int Ini::load(const std::string &file_name)
 
       ifs.getline(line, sizeof(line));
 
-      char *read_buf = strip(line);
+      char* read_buf = strip(line);
 
       if (strlen(read_buf) == 0) {
         // empty line
@@ -191,8 +184,7 @@ int Ini::load(const std::string &file_name)
   return 0;
 }
 
-void Ini::to_string(std::string &output_str)
-{
+void Ini::to_string(std::string& output_str) {
   output_str.clear();
 
   output_str += "Begin dump configuration\n";
@@ -203,7 +195,7 @@ void Ini::to_string(std::string &output_str)
     output_str += CFG_SESSION_END_TAG;
     output_str += "\n";
 
-    std::map<std::string, std::string> &section_map = it->second;
+    std::map<std::string, std::string>& section_map = it->second;
 
     for (std::map<std::string, std::string>::iterator sub_it = section_map.begin(); sub_it != section_map.end();
          sub_it++) {
@@ -221,9 +213,8 @@ void Ini::to_string(std::string &output_str)
 }
 
 //! Accessor function which wraps global properties object
-Ini *&get_properties()
-{
-  static Ini *properties = new Ini();
+Ini*& get_properties() {
+  static Ini* properties = new Ini();
   return properties;
 }
 

@@ -36,8 +36,7 @@ namespace common {
 
 #endif
 
-inline const std::string &theSwVersion()
-{
+inline const std::string& theSwVersion() {
   static const std::string swVersion(VERSION_STR);
 
   return swVersion;

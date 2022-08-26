@@ -55,7 +55,7 @@ class EventDispatcher : public Stage {
 
   // public interface operations
 
-public:
+ public:
   typedef enum { SEND_EVENT = 0, STORE_EVENT, FAIL_EVENT } status_t;
 
   /**
@@ -73,11 +73,11 @@ public:
    * @param[in] event Pointer to event that must be handled.
    * @post  event must not be de-referenced by caller after return
    */
-  void handle_event(StageEvent *event);
+  void handle_event(StageEvent* event);
 
   // Note, EventDispatcher is an abstract class and needs no make_stage()
 
-protected:
+ protected:
   /**
    * Constructor
    * @param[in] tag     The label that identifies this stage.
@@ -86,7 +86,7 @@ protected:
    * @post event queue is empty
    * @post stage is not connected
    */
-  EventDispatcher(const char *tag);
+  EventDispatcher(const char* tag);
 
   /**
    * Initialize stage params and validate outputs
@@ -96,8 +96,7 @@ protected:
   bool initialize();
 
   // set properties for this object
-  bool set_properties()
-  {
+  bool set_properties() {
     return true;
   }
 
@@ -122,7 +121,7 @@ protected:
    *         FAIL_EVENT if failure, and event has been completed;
    *                    ctx is NULL
    */
-  virtual status_t dispatch_event(StageEvent *ev, DispatchContext *&ctx, std::string &hash) = 0;
+  virtual status_t dispatch_event(StageEvent* ev, DispatchContext*& ctx, std::string& hash) = 0;
 
   /**
    * Wake up a stored event
@@ -135,14 +134,14 @@ protected:
 
   // implementation state
 
-  typedef std::pair<StageEvent *, DispatchContext *> StoredEvent;
+  typedef std::pair<StageEvent*, DispatchContext*> StoredEvent;
   typedef std::map<std::string, std::list<StoredEvent>> EventHash;
 
   EventHash event_store_;       // events stored here while waiting
   pthread_mutex_t event_lock_;  // protects access to event_store_
-  Stage *next_stage_;           // target for dispatched events
+  Stage* next_stage_;           // target for dispatched events
 
-protected:
+ protected:
 };
 
 /**
@@ -150,9 +149,9 @@ protected:
  * derive from this base class.
  */
 class DispatchContext {
-public:
-  virtual ~DispatchContext()
-  {}
+ public:
+  virtual ~DispatchContext() {
+  }
 };
 
 }  // namespace common

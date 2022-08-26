@@ -20,23 +20,22 @@ class SQLStageEvent;
 class Stmt;
 
 class OptimizeEvent : public common::StageEvent {
-public:
-  OptimizeEvent(SQLStageEvent *sql_event, common::StageEvent *parent_event)
-    : sql_event_(sql_event), parent_event_(parent_event)
-  {}
+ public:
+  OptimizeEvent(SQLStageEvent* sql_event, common::StageEvent* parent_event)
+      : sql_event_(sql_event), parent_event_(parent_event) {
+  }
 
   virtual ~OptimizeEvent() noexcept = default;
 
-  SQLStageEvent *sql_event() const {
+  SQLStageEvent* sql_event() const {
     return sql_event_;
   }
 
-  common::StageEvent *parent_event() const {
+  common::StageEvent* parent_event() const {
     return parent_event_;
   }
 
-private:
-  SQLStageEvent *sql_event_ = nullptr;
-  common::StageEvent *parent_event_ = nullptr;
+ private:
+  SQLStageEvent* sql_event_ = nullptr;
+  common::StageEvent* parent_event_ = nullptr;
 };
-

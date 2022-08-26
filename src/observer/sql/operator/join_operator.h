@@ -19,11 +19,10 @@ See the Mulan PSL v2 for more details. */
 #include "rc.h"
 
 // TODO fixme
-class JoinOperator : public Operator
-{
-public:
-  JoinOperator(Operator *left, Operator *right)
-  {}
+class JoinOperator : public Operator {
+ public:
+  JoinOperator(Operator* left, Operator* right) {
+  }
 
   virtual ~JoinOperator() = default;
 
@@ -31,8 +30,8 @@ public:
   RC next() override;
   RC close() override;
 
-private:
-  Operator *left_ = nullptr;
-  Operator *right_ = nullptr;
+ private:
+  Operator* left_ = nullptr;
+  Operator* right_ = nullptr;
   bool round_done_ = true;
 };

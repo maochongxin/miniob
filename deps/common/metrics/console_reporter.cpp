@@ -21,16 +21,14 @@ See the Mulan PSL v2 for more details. */
 
 namespace common {
 
-ConsoleReporter *get_console_reporter()
-{
-  static ConsoleReporter *instance = new ConsoleReporter();
+ConsoleReporter* get_console_reporter() {
+  static ConsoleReporter* instance = new ConsoleReporter();
 
   return instance;
 }
 
-void ConsoleReporter::report(const std::string &tag, Metric *metric)
-{
-  Snapshot *snapshot = metric->get_snapshot();
+void ConsoleReporter::report(const std::string& tag, Metric* metric) {
+  Snapshot* snapshot = metric->get_snapshot();
 
   if (snapshot != NULL) {
     printf("%s:%s\n", tag.c_str(), snapshot->to_string().c_str());

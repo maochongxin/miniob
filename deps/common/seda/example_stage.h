@@ -20,19 +20,19 @@ See the Mulan PSL v2 for more details. */
 namespace common {
 
 class ExampleStage : public Stage {
-public:
+ public:
   ~ExampleStage();
-  static Stage *make_stage(const std::string &tag);
+  static Stage* make_stage(const std::string& tag);
 
-protected:
+ protected:
   // common function
-  ExampleStage(const char *tag);
+  ExampleStage(const char* tag);
   bool set_properties();
 
   bool initialize();
   void cleanup();
-  void handle_event(StageEvent *event);
-  void callback_event(StageEvent *event, CallbackContext *context);
+  void handle_event(StageEvent* event);
+  void callback_event(StageEvent* event, CallbackContext* context);
 };
 }  // namespace common
 #endif  //__COMMON_SEDA_EXAMPLE_STAGE_H__

@@ -14,8 +14,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/mm/mem_pool.h"
 namespace common {
 
-int MemPoolItem::init(int item_size, bool dynamic, int pool_num, int item_num_per_pool)
-{
+int MemPoolItem::init(int item_size, bool dynamic, int pool_num, int item_num_per_pool) {
   if (pools.empty() == false) {
     LOG_WARN("Memory pool has been initialized, but still begin to be initialized, this->name:%s.", this->name.c_str());
     return 0;
@@ -50,8 +49,7 @@ int MemPoolItem::init(int item_size, bool dynamic, int pool_num, int item_num_pe
   return 0;
 }
 
-void MemPoolItem::cleanup()
-{
+void MemPoolItem::cleanup() {
   if (pools.empty() == true) {
     LOG_WARN("Begin to do cleanup, but there is no memory pool, this->name:%s!", this->name.c_str());
     return;
@@ -63,8 +61,8 @@ void MemPoolItem::cleanup()
   frees.clear();
   this->size = 0;
 
-  for (std::list<void *>::iterator iter = pools.begin(); iter != pools.end(); iter++) {
-    void *pool = *iter;
+  for (std::list<void*>::iterator iter = pools.begin(); iter != pools.end(); iter++) {
+    void* pool = *iter;
 
     ::free(pool);
   }
@@ -73,15 +71,14 @@ void MemPoolItem::cleanup()
   LOG_INFO("Successfully do cleanup, this->name:%s.", this->name.c_str());
 }
 
-int MemPoolItem::extend()
-{
+int MemPoolItem::extend() {
   if (this->dynamic == false) {
     LOG_ERROR("Disable dynamic extend memory pool, but begin to extend, this->name:%s", this->name.c_str());
     return -1;
   }
 
   MUTEX_LOCK(&this->mutex);
-  void *pool = malloc(item_num_per_pool * item_size);
+  void* pool = malloc(item_num_per_pool * item_size);
   if (pool == nullptr) {
     MUTEX_UNLOCK(&this->mutex);
     LOG_ERROR("Failed to extend memory pool, this->size:%d, item_num_per_pool:%d, this->name:%s.",
@@ -94,8 +91,8 @@ int MemPoolItem::extend()
   pools.push_back(pool);
   this->size += item_num_per_pool;
   for (int i = 0; i < item_num_per_pool; i++) {
-    char *item = (char *)pool + i * item_size;
-    frees.push_back((void *)item);
+    char* item = (char*)pool + i * item_size;
+    frees.push_back((void*)item);
   }
   MUTEX_UNLOCK(&this->mutex);
 
@@ -107,8 +104,7 @@ int MemPoolItem::extend()
   return 0;
 }
 
-void *MemPoolItem::alloc()
-{
+void* MemPoolItem::alloc() {
   MUTEX_LOCK(&this->mutex);
   if (frees.empty() == true) {
     if (this->dynamic == false) {
@@ -121,7 +117,7 @@ void *MemPoolItem::alloc()
       return nullptr;
     }
   }
-  void *buffer = frees.front();
+  void* buffer = frees.front();
   frees.pop_front();
 
   used.insert(buffer);
@@ -132,8 +128,7 @@ void *MemPoolItem::alloc()
   return buffer;
 }
 
-void MemPoolItem::free(void *buf)
-{
+void MemPoolItem::free(void* buf) {
   MUTEX_LOCK(&this->mutex);
 
   size_t num = used.erase(buf);

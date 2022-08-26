@@ -20,15 +20,12 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-TEST(test_bitmap, test_bitmap)
-{
+TEST(test_bitmap, test_bitmap) {
   char buf1[1];
   memset(buf1, 0, sizeof(buf1));
   Bitmap bitmap(buf1, 8);
 
-  for (int i = 0; i < 8; i++) {
-    ASSERT_EQ(bitmap.get_bit(i), false);
-  }
+  for (int i = 0; i < 8; i++) { ASSERT_EQ(bitmap.get_bit(i), false); }
 
   ASSERT_EQ(0, bitmap.next_unsetted_bit(0));
   ASSERT_EQ(-1, bitmap.next_setted_bit(0));
@@ -40,12 +37,8 @@ TEST(test_bitmap, test_bitmap)
   ASSERT_EQ(-1, bitmap.next_unsetted_bit(0));
   ASSERT_EQ(0, bitmap.next_setted_bit(0));
 
-  for (int i = 0; i < 8; i++) {
-    bitmap.clear_bit(i);
-  }
-  for (int i = 0; i < 8; i++) {
-    ASSERT_EQ(bitmap.get_bit(i), false);
-  }
+  for (int i = 0; i < 8; i++) { bitmap.clear_bit(i); }
+  for (int i = 0; i < 8; i++) { ASSERT_EQ(bitmap.get_bit(i), false); }
 
   char buf3[3];
   memset(buf3, 0, sizeof(buf3));
@@ -67,8 +60,7 @@ TEST(test_bitmap, test_bitmap)
   ASSERT_EQ(16, bitmap3.next_setted_bit(8));
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   // 分析gtest程序的命令行参数
   testing::InitGoogleTest(&argc, argv);
 

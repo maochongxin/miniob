@@ -28,62 +28,50 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 namespace common {
 
-char *strip(char *str_)
-{
+char* strip(char* str_) {
   if (str_ == NULL || *str_ == 0) {
     LOG_ERROR("The augument is invalid!");
     return str_;
   }
 
-  char *head = str_;
-  while (isspace(*head))
-    ++head;
+  char* head = str_;
+  while (isspace(*head)) ++head;
 
-  char *last = str_ + strlen(str_) - 1;
-  while (isspace(*last) && last != str_)
-    --last;
+  char* last = str_ + strlen(str_) - 1;
+  while (isspace(*last) && last != str_) --last;
   *(last + 1) = 0;
   return head;
 }
 
-void strip(std::string &str)
-{
+void strip(std::string& str) {
   size_t head = 0;
 
-  while (isspace(str[head])) {
-    ++head;
-  }
+  while (isspace(str[head])) { ++head; }
 
   size_t tail = str.size() - 1;
-  while (isspace(str[tail]) && tail != head) {
-    --tail;
-  }
+  while (isspace(str[tail]) && tail != head) { --tail; }
 
   str = str.substr(head, (tail - head) + 1);
 }
 
 // Translation functions with templates are defined in the header file
-std::string size_to_pad_str(int size, int pad)
-{
+std::string size_to_pad_str(int size, int pad) {
   std::ostringstream ss;
   ss << std::setw(pad) << std::setfill('0') << size;
   return ss.str();
 }
 
-std::string &str_to_upper(std::string &s)
-{
+std::string& str_to_upper(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), (int (*)(int)) & std::toupper);
   return s;
 }
 
-std::string &str_to_lower(std::string &s)
-{
+std::string& str_to_lower(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), (int (*)(int)) & std::tolower);
   return s;
 }
 
-void split_string(const std::string &str, std::string delim, std::set<std::string> &results)
-{
+void split_string(const std::string& str, std::string delim, std::set<std::string>& results) {
   int cut_at;
   std::string tmp_str(str);
   while ((cut_at = tmp_str.find_first_of(delim)) != (signed)tmp_str.npos) {
@@ -98,8 +86,7 @@ void split_string(const std::string &str, std::string delim, std::set<std::strin
   }
 }
 
-void split_string(const std::string &str, std::string delim, std::vector<std::string> &results)
-{
+void split_string(const std::string& str, std::string delim, std::vector<std::string>& results) {
   int cut_at;
   std::string tmp_str(str);
   while ((cut_at = tmp_str.find_first_of(delim)) != (signed)tmp_str.npos) {
@@ -114,10 +101,9 @@ void split_string(const std::string &str, std::string delim, std::vector<std::st
   }
 }
 
-void split_string(char *str, char dim, std::vector<char *> &results, bool keep_null)
-{
-  char *p = str;
-  char *l = p;
+void split_string(char* str, char dim, std::vector<char*>& results, bool keep_null) {
+  char* p = str;
+  char* l = p;
   while (*p) {
     if (*p == dim) {
       *p++ = 0;
@@ -132,8 +118,7 @@ void split_string(char *str, char dim, std::vector<char *> &results, bool keep_n
   return;
 }
 
-void merge_string(std::string &str, std::string delim, std::vector<std::string> &source, size_t result_len)
-{
+void merge_string(std::string& str, std::string delim, std::vector<std::string>& source, size_t result_len) {
 
   std::ostringstream ss;
   if (source.empty()) {
@@ -157,8 +142,7 @@ void merge_string(std::string &str, std::string delim, std::vector<std::string> 
   return;
 }
 
-void replace(std::string &str, const std::string &old, const std::string &new_str)
-{
+void replace(std::string& str, const std::string& old, const std::string& new_str) {
   if (old.compare(new_str) == 0) {
     return;
   }
@@ -189,25 +173,21 @@ void replace(std::string &str, const std::string &old, const std::string &new_st
   return;
 }
 
-char *bin_to_hex(const char *s, const int len, char *hex_buff)
-{
+char* bin_to_hex(const char* s, const int len, char* hex_buff) {
   int new_len = 0;
-  unsigned char *end = (unsigned char *)s + len;
-  for (unsigned char *p = (unsigned char *)s; p < end; p++) {
-    new_len += sprintf(hex_buff + new_len, "%02x", *p);
-  }
+  unsigned char* end = (unsigned char*)s + len;
+  for (unsigned char* p = (unsigned char*)s; p < end; p++) { new_len += sprintf(hex_buff + new_len, "%02x", *p); }
 
   hex_buff[new_len] = '\0';
   return hex_buff;
 }
 
-char *hex_to_bin(const char *s, char *bin_buff, int *dest_len)
-{
+char* hex_to_bin(const char* s, char* bin_buff, int* dest_len) {
   char buff[3];
-  char *src;
+  char* src;
   int src_len;
-  char *p_dest;
-  char *p_dest_end;
+  char* p_dest;
+  char* p_dest_end;
 
   src_len = strlen(s);
   if (src_len == 0) {
@@ -217,7 +197,7 @@ char *hex_to_bin(const char *s, char *bin_buff, int *dest_len)
   }
 
   *dest_len = src_len / 2;
-  src = (char *)s;
+  src = (char*)s;
   buff[2] = '\0';
 
   p_dest_end = bin_buff + (*dest_len);
@@ -231,8 +211,7 @@ char *hex_to_bin(const char *s, char *bin_buff, int *dest_len)
   return bin_buff;
 }
 
-bool is_blank(const char *s)
-{
+bool is_blank(const char* s) {
   if (s == nullptr) {
     return true;
   }

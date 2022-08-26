@@ -17,8 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include "pthread.h"
 namespace common {
 
-void setSignalHandler(int sig, sighandler_t func)
-{
+void setSignalHandler(int sig, sighandler_t func) {
   struct sigaction newsa, oldsa;
   sigemptyset(&newsa.sa_mask);
   newsa.sa_flags = 0;
@@ -32,16 +31,14 @@ void setSignalHandler(int sig, sighandler_t func)
 /*
 ** Set Singal handling Fucntion
 */
-void setSignalHandler(sighandler_t func)
-{
+void setSignalHandler(sighandler_t func) {
   setSignalHandler(SIGQUIT, func);
   setSignalHandler(SIGINT, func);
   setSignalHandler(SIGHUP, func);
   setSignalHandler(SIGTERM, func);
 }
 
-void blockDefaultSignals(sigset_t *signal_set, sigset_t *old_set)
-{
+void blockDefaultSignals(sigset_t* signal_set, sigset_t* old_set) {
   sigemptyset(signal_set);
 #ifndef DEBUG
   // SIGINT will effect our gdb debugging
@@ -52,8 +49,7 @@ void blockDefaultSignals(sigset_t *signal_set, sigset_t *old_set)
   pthread_sigmask(SIG_BLOCK, signal_set, old_set);
 }
 
-void unBlockDefaultSignals(sigset_t *signal_set, sigset_t *old_set)
-{
+void unBlockDefaultSignals(sigset_t* signal_set, sigset_t* old_set) {
   sigemptyset(signal_set);
 #ifndef DEBUG
   sigaddset(signal_set, SIGINT);
@@ -63,10 +59,9 @@ void unBlockDefaultSignals(sigset_t *signal_set, sigset_t *old_set)
   pthread_sigmask(SIG_UNBLOCK, signal_set, old_set);
 }
 
-void *waitForSignals(void *args)
-{
+void* waitForSignals(void* args) {
   LOG_INFO("Start thread to wait signals.");
-  sigset_t *signal_set = (sigset_t *)args;
+  sigset_t* signal_set = (sigset_t*)args;
   int sig_number = -1;
   while (true) {
     errno = 0;
@@ -81,8 +76,7 @@ void *waitForSignals(void *args)
   return NULL;
 }
 
-void startWaitForSignals(sigset_t *signal_set)
-{
+void startWaitForSignals(sigset_t* signal_set) {
   pthread_t pThread;
   pthread_attr_t pThreadAttrs;
 
@@ -90,6 +84,6 @@ void startWaitForSignals(sigset_t *signal_set)
   pthread_attr_init(&pThreadAttrs);
   pthread_attr_setdetachstate(&pThreadAttrs, PTHREAD_CREATE_DETACHED);
 
-  pthread_create(&pThread, &pThreadAttrs, waitForSignals, (void *)signal_set);
+  pthread_create(&pThread, &pThreadAttrs, waitForSignals, (void*)signal_set);
 }
 }  // namespace common

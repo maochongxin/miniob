@@ -32,12 +32,12 @@ namespace common {
  */
 
 class UniformReservoir : public Reservoir {
-public:
-  UniformReservoir(RandomGenerator &random);
-  UniformReservoir(RandomGenerator &random, size_t size);
+ public:
+  UniformReservoir(RandomGenerator& random);
+  UniformReservoir(RandomGenerator& random, size_t size);
   virtual ~UniformReservoir();
 
-public:
+ public:
   size_t size();       // data buffer size
   size_t get_count();  // how many items have been insert?
 
@@ -46,10 +46,10 @@ public:
 
   void reset();
 
-protected:
+ protected:
   void init(size_t size);
 
-protected:
+ protected:
   pthread_mutex_t mutex;
   size_t counter;  // counter is likely to be bigger than data.size()
   std::vector<double> data;

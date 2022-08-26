@@ -26,78 +26,69 @@ enum class ExprType {
   VALUE,
 };
 
-class Expression
-{
-public: 
+class Expression {
+ public:
   Expression() = default;
   virtual ~Expression() = default;
-  
-  virtual RC get_value(const Tuple &tuple, TupleCell &cell) const = 0;
+
+  virtual RC get_value(const Tuple& tuple, TupleCell& cell) const = 0;
   virtual ExprType type() const = 0;
 };
 
-class FieldExpr : public Expression
-{
-public:
+class FieldExpr : public Expression {
+ public:
   FieldExpr() = default;
-  FieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
-  {}
+  FieldExpr(const Table* table, const FieldMeta* field) : field_(table, field) {
+  }
 
   virtual ~FieldExpr() = default;
 
-  ExprType type() const override
-  {
+  ExprType type() const override {
     return ExprType::FIELD;
   }
 
-  Field &field()
-  {
+  Field& field() {
     return field_;
   }
 
-  const Field &field() const
-  {
+  const Field& field() const {
     return field_;
   }
 
-  const char *table_name() const
-  {
+  const char* table_name() const {
     return field_.table_name();
   }
 
-  const char *field_name() const
-  {
+  const char* field_name() const {
     return field_.field_name();
   }
 
-  RC get_value(const Tuple &tuple, TupleCell &cell) const override;
-private:
+  RC get_value(const Tuple& tuple, TupleCell& cell) const override;
+
+ private:
   Field field_;
 };
 
-class ValueExpr : public Expression
-{
-public:
+class ValueExpr : public Expression {
+ public:
   ValueExpr() = default;
-  ValueExpr(const Value &value) : tuple_cell_(value.type, (char *)value.data)
-  {
+  ValueExpr(const Value& value) : tuple_cell_(value.type, (char*)value.data) {
     if (value.type == CHARS) {
-      tuple_cell_.set_length(strlen((const char *)value.data));
+      tuple_cell_.set_length(strlen((const char*)value.data));
     }
   }
 
   virtual ~ValueExpr() = default;
 
-  RC get_value(const Tuple &tuple, TupleCell & cell) const override;
-  ExprType type() const override
-  {
+  RC get_value(const Tuple& tuple, TupleCell& cell) const override;
+  ExprType type() const override {
     return ExprType::VALUE;
   }
 
-  void get_tuple_cell(TupleCell &cell) const {
+  void get_tuple_cell(TupleCell& cell) const {
     cell = tuple_cell_;
   }
 
-private:
+ private:
   TupleCell tuple_cell_;
 };

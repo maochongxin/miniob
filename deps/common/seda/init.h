@@ -32,7 +32,7 @@ namespace common {
 /**
  * start the seda process, do this will trigger all threads
  */
-int init_seda(ProcessParam *process_cfg);
+int init_seda(ProcessParam* process_cfg);
 
 void cleanup_seda();
 

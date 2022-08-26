@@ -34,17 +34,16 @@ using namespace common;
 const std::string SessionStage::SQL_METRIC_TAG = "SessionStage.sql";
 
 // Constructor
-SessionStage::SessionStage(const char *tag) : Stage(tag), plan_cache_stage_(nullptr), sql_metric_(nullptr)
-{}
+SessionStage::SessionStage(const char* tag) : Stage(tag), plan_cache_stage_(nullptr), sql_metric_(nullptr) {
+}
 
 // Destructor
-SessionStage::~SessionStage()
-{}
+SessionStage::~SessionStage() {
+}
 
 // Parse properties, instantiate a stage object
-Stage *SessionStage::make_stage(const std::string &tag)
-{
-  SessionStage *stage = new (std::nothrow) SessionStage(tag.c_str());
+Stage* SessionStage::make_stage(const std::string& tag) {
+  SessionStage* stage = new (std::nothrow) SessionStage(tag.c_str());
   if (stage == nullptr) {
     LOG_ERROR("new ExecutorStage failed");
     return nullptr;
@@ -54,8 +53,7 @@ Stage *SessionStage::make_stage(const std::string &tag)
 }
 
 // Set properties for this object set in stage specific properties
-bool SessionStage::set_properties()
-{
+bool SessionStage::set_properties() {
   //  std::string stageNameStr(stage_name_);
   //  std::map<std::string, std::string> section = g_properties()->get(
   //    stageNameStr);
@@ -68,14 +66,13 @@ bool SessionStage::set_properties()
 }
 
 // Initialize stage params and validate outputs
-bool SessionStage::initialize()
-{
+bool SessionStage::initialize() {
   LOG_TRACE("Enter");
 
-  std::list<Stage *>::iterator stgp = next_stage_list_.begin();
+  std::list<Stage*>::iterator stgp = next_stage_list_.begin();
   plan_cache_stage_ = *(stgp++);
 
-  MetricsRegistry &metricsRegistry = get_metrics_registry();
+  MetricsRegistry& metricsRegistry = get_metrics_registry();
   sql_metric_ = new SimpleTimer();
   metricsRegistry.register_metric(SQL_METRIC_TAG, sql_metric_);
   LOG_TRACE("Exit");
@@ -83,11 +80,10 @@ bool SessionStage::initialize()
 }
 
 // Cleanup after disconnection
-void SessionStage::cleanup()
-{
+void SessionStage::cleanup() {
   LOG_TRACE("Enter");
 
-  MetricsRegistry &metricsRegistry = get_metrics_registry();
+  MetricsRegistry& metricsRegistry = get_metrics_registry();
   if (sql_metric_ != nullptr) {
     metricsRegistry.unregister(SQL_METRIC_TAG);
     delete sql_metric_;
@@ -97,8 +93,7 @@ void SessionStage::cleanup()
   LOG_TRACE("Exit");
 }
 
-void SessionStage::handle_event(StageEvent *event)
-{
+void SessionStage::handle_event(StageEvent* event) {
   LOG_TRACE("Enter\n");
 
   // right now, we just support only one event.
@@ -108,17 +103,16 @@ void SessionStage::handle_event(StageEvent *event)
   return;
 }
 
-void SessionStage::callback_event(StageEvent *event, CallbackContext *context)
-{
+void SessionStage::callback_event(StageEvent* event, CallbackContext* context) {
   LOG_TRACE("Enter\n");
 
-  SessionEvent *sev = dynamic_cast<SessionEvent *>(event);
+  SessionEvent* sev = dynamic_cast<SessionEvent*>(event);
   if (nullptr == sev) {
     LOG_ERROR("Cannot cat event to sessionEvent");
     return;
   }
 
-  const char *response = sev->get_response();
+  const char* response = sev->get_response();
   int len = sev->get_response_len();
   if (len <= 0 || response == nullptr) {
     response = "No data\n";
@@ -136,9 +130,8 @@ void SessionStage::callback_event(StageEvent *event, CallbackContext *context)
   return;
 }
 
-void SessionStage::handle_request(StageEvent *event)
-{
-  SessionEvent *sev = dynamic_cast<SessionEvent *>(event);
+void SessionStage::handle_request(StageEvent* event) {
+  SessionEvent* sev = dynamic_cast<SessionEvent*>(event);
   if (nullptr == sev) {
     LOG_ERROR("Cannot cat event to sessionEvent");
     return;
@@ -157,7 +150,7 @@ void SessionStage::handle_request(StageEvent *event)
     return;
   }
 
-  CompletionCallback *cb = new (std::nothrow) CompletionCallback(this, nullptr);
+  CompletionCallback* cb = new (std::nothrow) CompletionCallback(this, nullptr);
   if (cb == nullptr) {
     LOG_ERROR("Failed to new callback for SessionEvent");
 
@@ -167,6 +160,6 @@ void SessionStage::handle_request(StageEvent *event)
 
   sev->push_callback(cb);
 
-  SQLStageEvent *sql_event = new SQLStageEvent(sev, sql);
+  SQLStageEvent* sql_event = new SQLStageEvent(sev, sql);
   plan_cache_stage_->handle_event(sql_event);
 }

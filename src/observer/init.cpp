@@ -41,26 +41,22 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-bool *&_get_init()
-{
+bool*& _get_init() {
   static bool util_init = false;
-  static bool *util_init_p = &util_init;
+  static bool* util_init_p = &util_init;
   return util_init_p;
 }
 
-bool get_init()
-{
+bool get_init() {
   return *_get_init();
 }
 
-void set_init(bool value)
-{
+void set_init(bool value) {
   *_get_init() = value;
   return;
 }
 
-void sig_handler(int sig)
-{
+void sig_handler(int sig) {
   // Signal handler will be add in the next step.
   //  Add action to shutdown
 
@@ -69,9 +65,8 @@ void sig_handler(int sig)
   return;
 }
 
-int init_log(ProcessParam *process_cfg, Ini &properties)
-{
-  const std::string &proc_name = process_cfg->get_process_name();
+int init_log(ProcessParam* process_cfg, Ini& properties) {
+  const std::string& proc_name = process_cfg->get_process_name();
   try {
     // we had better alloc one lock to do so, but simplify the logic
     if (g_log) {
@@ -126,7 +121,7 @@ int init_log(ProcessParam *process_cfg, Ini &properties)
     }
 
     return 0;
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     std::cerr << "Failed to init log for " << proc_name << SYS_OUTPUT_FILE_POS << SYS_OUTPUT_ERROR << std::endl;
     return errno;
   }
@@ -134,8 +129,7 @@ int init_log(ProcessParam *process_cfg, Ini &properties)
   return 0;
 }
 
-void cleanup_log()
-{
+void cleanup_log() {
 
   if (g_log) {
     delete g_log;
@@ -144,8 +138,7 @@ void cleanup_log()
   return;
 }
 
-int prepare_init_seda()
-{
+int prepare_init_seda() {
   static StageFactory session_stage_factory("SessionStage", &SessionStage::make_stage);
   static StageFactory resolve_stage_factory("ResolveStage", &ResolveStage::make_stage);
   static StageFactory query_cache_stage_factory("QueryCacheStage", &QueryCacheStage::make_stage);
@@ -158,26 +151,24 @@ int prepare_init_seda()
   return 0;
 }
 
-int init_global_objects()
-{
-  BufferPoolManager *bpm = new BufferPoolManager();
+int init_global_objects() {
+  BufferPoolManager* bpm = new BufferPoolManager();
   BufferPoolManager::set_instance(bpm);
 
-  DefaultHandler *handler = new DefaultHandler();
+  DefaultHandler* handler = new DefaultHandler();
   DefaultHandler::set_default(handler);
 
   return 0;
 }
 
-int uninit_global_objects()
-{
-  DefaultHandler *default_handler = &DefaultHandler::get_default();
+int uninit_global_objects() {
+  DefaultHandler* default_handler = &DefaultHandler::get_default();
   if (default_handler != nullptr) {
     DefaultHandler::set_default(nullptr);
     delete default_handler;
   }
 
-  BufferPoolManager *bpm = &BufferPoolManager::instance();
+  BufferPoolManager* bpm = &BufferPoolManager::instance();
   if (bpm != nullptr) {
     BufferPoolManager::set_instance(nullptr);
     delete bpm;
@@ -185,8 +176,7 @@ int uninit_global_objects()
   return 0;
 }
 
-int init(ProcessParam *process_param)
-{
+int init(ProcessParam* process_param) {
 
   if (get_init()) {
 
@@ -245,8 +235,8 @@ int init(ProcessParam *process_param)
     return rc;
   }
 
-  LogReporter *log_reporter = get_log_reporter();
-  MetricsRegistry &metrics_registry = get_metrics_registry();
+  LogReporter* log_reporter = get_log_reporter();
+  MetricsRegistry& metrics_registry = get_metrics_registry();
 
   metrics_registry.add_reporter(log_reporter);
 
@@ -262,10 +252,9 @@ int init(ProcessParam *process_param)
   return STATUS_SUCCESS;
 }
 
-void cleanup_util()
-{
+void cleanup_util() {
   uninit_global_objects();
-  
+
   if (nullptr != get_properties()) {
     delete get_properties();
     get_properties() = nullptr;
@@ -280,7 +269,6 @@ void cleanup_util()
   return;
 }
 
-void cleanup()
-{
+void cleanup() {
   cleanup_util();
 }

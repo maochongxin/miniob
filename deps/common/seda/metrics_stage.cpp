@@ -29,25 +29,23 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-MetricsRegistry &get_metric_registry()
-{
+MetricsRegistry& get_metric_registry() {
   static MetricsRegistry metrics_registry;
 
   return metrics_registry;
 }
 
 // Constructor
-MetricsStage::MetricsStage(const char *tag) : Stage(tag)
-{}
+MetricsStage::MetricsStage(const char* tag) : Stage(tag) {
+}
 
 // Destructor
-MetricsStage::~MetricsStage()
-{}
+MetricsStage::~MetricsStage() {
+}
 
 // Parse properties, instantiate a stage object
-Stage *MetricsStage::make_stage(const std::string &tag)
-{
-  MetricsStage *stage = new MetricsStage(tag.c_str());
+Stage* MetricsStage::make_stage(const std::string& tag) {
+  MetricsStage* stage = new MetricsStage(tag.c_str());
   if (stage == NULL) {
     LOG_ERROR("new MetricsStage failed");
     return NULL;
@@ -57,8 +55,7 @@ Stage *MetricsStage::make_stage(const std::string &tag)
 }
 
 // Set properties for this object set in stage specific properties
-bool MetricsStage::set_properties()
-{
+bool MetricsStage::set_properties() {
   std::string stage_name_str(stage_name_);
   std::map<std::string, std::string> section = get_properties()->get(stage_name_str);
 
@@ -74,14 +71,13 @@ bool MetricsStage::set_properties()
 }
 
 // Initialize stage params and validate outputs
-bool MetricsStage::initialize()
-{
+bool MetricsStage::initialize() {
   LOG_TRACE("Enter");
 
-  std::list<Stage *>::iterator stgp = next_stage_list_.begin();
+  std::list<Stage*>::iterator stgp = next_stage_list_.begin();
   timer_stage_ = *(stgp++);
 
-  MetricsReportEvent *report_event = new MetricsReportEvent();
+  MetricsReportEvent* report_event = new MetricsReportEvent();
 
   add_event(report_event);
   LOG_TRACE("Exit");
@@ -89,18 +85,16 @@ bool MetricsStage::initialize()
 }
 
 // Cleanup after disconnection
-void MetricsStage::cleanup()
-{
+void MetricsStage::cleanup() {
   LOG_TRACE("Enter");
 
   LOG_TRACE("Exit");
 }
 
-void MetricsStage::handle_event(StageEvent *event)
-{
+void MetricsStage::handle_event(StageEvent* event) {
   LOG_TRACE("Enter\n");
 
-  CompletionCallback *cb = new CompletionCallback(this, NULL);
+  CompletionCallback* cb = new CompletionCallback(this, NULL);
   if (cb == NULL) {
     LOG_ERROR("Failed to new callback");
 
@@ -109,7 +103,7 @@ void MetricsStage::handle_event(StageEvent *event)
     return;
   }
 
-  TimerRegisterEvent *tm_event = new TimerRegisterEvent(event, metric_report_interval_ * USEC_PER_SEC);
+  TimerRegisterEvent* tm_event = new TimerRegisterEvent(event, metric_report_interval_ * USEC_PER_SEC);
   if (tm_event == NULL) {
     LOG_ERROR("Failed to new TimerRegisterEvent");
 
@@ -127,11 +121,10 @@ void MetricsStage::handle_event(StageEvent *event)
   return;
 }
 
-void MetricsStage::callback_event(StageEvent *event, CallbackContext *context)
-{
+void MetricsStage::callback_event(StageEvent* event, CallbackContext* context) {
   LOG_TRACE("Enter\n");
 
-  MetricsRegistry &metrics_registry = get_metrics_registry();
+  MetricsRegistry& metrics_registry = get_metrics_registry();
 
   metrics_registry.snapshot();
   metrics_registry.report();

@@ -19,24 +19,27 @@ See the Mulan PSL v2 for more details. */
 
 class Table;
 
-class UpdateStmt : public Stmt
-{
-public:
-
+class UpdateStmt : public Stmt {
+ public:
   UpdateStmt() = default;
-  UpdateStmt(Table *table, Value *values, int value_amount);
+  UpdateStmt(Table* table, Value* values, int value_amount);
 
-public:
-  static RC create(Db *db, const Updates &update_sql, Stmt *&stmt);
+ public:
+  static RC create(Db* db, const Updates& update_sql, Stmt*& stmt);
 
-public:
-  Table *table() const {return table_;}
-  Value *values() const { return values_; }
-  int value_amount() const { return value_amount_; }
+ public:
+  Table* table() const {
+    return table_;
+  }
+  Value* values() const {
+    return values_;
+  }
+  int value_amount() const {
+    return value_amount_;
+  }
 
-private:
-  Table *table_ = nullptr;
-  Value *values_ = nullptr;
+ private:
+  Table* table_ = nullptr;
+  Value* values_ = nullptr;
   int value_amount_ = 0;
 };
-

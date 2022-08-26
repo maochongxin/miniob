@@ -29,8 +29,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/index/bplus_tree_index.h"
 #include "storage/trx/trx.h"
 
-Table::~Table()
-{
+Table::~Table() {
   if (record_handler_ != nullptr) {
     delete record_handler_;
     record_handler_ = nullptr;
@@ -41,8 +40,8 @@ Table::~Table()
     data_buffer_pool_ = nullptr;
   }
 
-  for (std::vector<Index *>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
-    Index *index = *it;
+  for (std::vector<Index*>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
+    Index* index = *it;
     delete index;
   }
   indexes_.clear();
@@ -51,8 +50,7 @@ Table::~Table()
 }
 
 RC Table::create(
-    const char *path, const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[])
-{
+    const char* path, const char* name, const char* base_dir, int attribute_count, const AttrInfo attributes[]) {
 
   if (common::is_blank(name)) {
     LOG_WARN("Name cannot be empty");
@@ -99,7 +97,7 @@ RC Table::create(
   fs.close();
 
   std::string data_file = table_data_file(base_dir, name);
-  BufferPoolManager &bpm = BufferPoolManager::instance();
+  BufferPoolManager& bpm = BufferPoolManager::instance();
   rc = bpm.create_file(data_file.c_str());
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to create disk buffer pool of data file. file name=%s", data_file.c_str());
@@ -118,8 +116,7 @@ RC Table::create(
   return rc;
 }
 
-RC Table::open(const char *meta_file, const char *base_dir)
-{
+RC Table::open(const char* meta_file, const char* base_dir) {
   // 加载元数据文件
   std::fstream fs;
   std::string meta_file_path = std::string(base_dir) + common::FILE_PATH_SPLIT_STR + meta_file;
@@ -147,8 +144,8 @@ RC Table::open(const char *meta_file, const char *base_dir)
 
   const int index_num = table_meta_.index_num();
   for (int i = 0; i < index_num; i++) {
-    const IndexMeta *index_meta = table_meta_.index(i);
-    const FieldMeta *field_meta = table_meta_.field(index_meta->field());
+    const IndexMeta* index_meta = table_meta_.index(i);
+    const FieldMeta* field_meta = table_meta_.field(index_meta->field());
     if (field_meta == nullptr) {
       LOG_ERROR("Found invalid index meta info which has a non-exists field. table=%s, index=%s, field=%s",
           name(),
@@ -159,7 +156,7 @@ RC Table::open(const char *meta_file, const char *base_dir)
       return RC::GENERIC_ERROR;
     }
 
-    BplusTreeIndex *index = new BplusTreeIndex();
+    BplusTreeIndex* index = new BplusTreeIndex();
     std::string index_file = table_index_file(base_dir, name(), index_meta->name());
     rc = index->open(index_file.c_str(), *index_meta, *field_meta);
     if (rc != RC::SUCCESS) {
@@ -179,8 +176,7 @@ RC Table::open(const char *meta_file, const char *base_dir)
   return rc;
 }
 
-RC Table::commit_insert(Trx *trx, const RID &rid)
-{
+RC Table::commit_insert(Trx* trx, const RID& rid) {
   Record record;
   RC rc = record_handler_->get_record(&rid, &record);
   if (rc != RC::SUCCESS) {
@@ -191,8 +187,7 @@ RC Table::commit_insert(Trx *trx, const RID &rid)
   return trx->commit_insert(this, record);
 }
 
-RC Table::rollback_insert(Trx *trx, const RID &rid)
-{
+RC Table::rollback_insert(Trx* trx, const RID& rid) {
 
   Record record;
   RC rc = record_handler_->get_record(&rid, &record);
@@ -216,8 +211,7 @@ RC Table::rollback_insert(Trx *trx, const RID &rid)
   return rc;
 }
 
-RC Table::insert_record(Trx *trx, Record *record)
-{
+RC Table::insert_record(Trx* trx, Record* record) {
   RC rc = RC::SUCCESS;
 
   if (trx != nullptr) {
@@ -265,14 +259,13 @@ RC Table::insert_record(Trx *trx, Record *record)
   }
   return rc;
 }
-RC Table::insert_record(Trx *trx, int value_num, const Value *values)
-{
+RC Table::insert_record(Trx* trx, int value_num, const Value* values) {
   if (value_num <= 0 || nullptr == values) {
     LOG_ERROR("Invalid argument. table name: %s, value num=%d, values=%p", name(), value_num, values);
     return RC::INVALID_ARGUMENT;
   }
 
-  char *record_data;
+  char* record_data;
   RC rc = make_record(value_num, values, record_data);
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to create a record. rc=%d:%s", rc, strrc(rc));
@@ -287,18 +280,15 @@ RC Table::insert_record(Trx *trx, int value_num, const Value *values)
   return rc;
 }
 
-const char *Table::name() const
-{
+const char* Table::name() const {
   return table_meta_.name();
 }
 
-const TableMeta &Table::table_meta() const
-{
+const TableMeta& Table::table_meta() const {
   return table_meta_;
 }
 
-RC Table::make_record(int value_num, const Value *values, char *&record_out)
-{
+RC Table::make_record(int value_num, const Value* values, char*& record_out) {
   // 检查字段类型是否一致
   if (value_num + table_meta_.sys_field_num() != table_meta_.field_num()) {
     LOG_WARN("Input values don't match the table's schema, table name:%s", table_meta_.name());
@@ -307,8 +297,8 @@ RC Table::make_record(int value_num, const Value *values, char *&record_out)
 
   const int normal_field_start_index = table_meta_.sys_field_num();
   for (int i = 0; i < value_num; i++) {
-    const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
-    const Value &value = values[i];
+    const FieldMeta* field = table_meta_.field(i + normal_field_start_index);
+    const Value& value = values[i];
     if (field->type() != value.type) {
       LOG_ERROR("Invalid value type. table name =%s, field name=%s, type=%d, but given=%d",
           table_meta_.name(),
@@ -321,14 +311,14 @@ RC Table::make_record(int value_num, const Value *values, char *&record_out)
 
   // 复制所有字段的值
   int record_size = table_meta_.record_size();
-  char *record = new char[record_size];
+  char* record = new char[record_size];
 
   for (int i = 0; i < value_num; i++) {
-    const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
-    const Value &value = values[i];
+    const FieldMeta* field = table_meta_.field(i + normal_field_start_index);
+    const Value& value = values[i];
     size_t copy_len = field->len();
     if (field->type() == CHARS) {
-      const size_t data_len = strlen((const char *)value.data);
+      const size_t data_len = strlen((const char*)value.data);
       if (copy_len > data_len) {
         copy_len = data_len + 1;
       }
@@ -340,8 +330,7 @@ RC Table::make_record(int value_num, const Value *values, char *&record_out)
   return RC::SUCCESS;
 }
 
-RC Table::init_record_handler(const char *base_dir)
-{
+RC Table::init_record_handler(const char* base_dir) {
   std::string data_file = table_data_file(base_dir, table_meta_.name());
 
   RC rc = BufferPoolManager::instance().open_file(data_file.c_str(), data_buffer_pool_);
@@ -364,8 +353,7 @@ RC Table::init_record_handler(const char *base_dir)
   return rc;
 }
 
-RC Table::get_record_scanner(RecordFileScanner &scanner)
-{
+RC Table::get_record_scanner(RecordFileScanner& scanner) {
   RC rc = scanner.open_scan(*data_buffer_pool_, nullptr);
   if (rc != RC::SUCCESS) {
     LOG_ERROR("failed to open scanner. rc=%d:%s", rc, strrc(rc));
@@ -377,39 +365,34 @@ RC Table::get_record_scanner(RecordFileScanner &scanner)
  * 为了不把Record暴露出去，封装一下
  */
 class RecordReaderScanAdapter {
-public:
-  explicit RecordReaderScanAdapter(void (*record_reader)(const char *data, void *context), void *context)
-      : record_reader_(record_reader), context_(context)
-  {}
+ public:
+  explicit RecordReaderScanAdapter(void (*record_reader)(const char* data, void* context), void* context)
+      : record_reader_(record_reader), context_(context) {
+  }
 
-  void consume(const Record *record)
-  {
+  void consume(const Record* record) {
     record_reader_(record->data(), context_);
   }
 
-private:
-  void (*record_reader_)(const char *, void *);
-  void *context_;
+ private:
+  void (*record_reader_)(const char*, void*);
+  void* context_;
 };
 
-static RC scan_record_reader_adapter(Record *record, void *context)
-{
-  RecordReaderScanAdapter &adapter = *(RecordReaderScanAdapter *)context;
+static RC scan_record_reader_adapter(Record* record, void* context) {
+  RecordReaderScanAdapter& adapter = *(RecordReaderScanAdapter*)context;
   adapter.consume(record);
   return RC::SUCCESS;
 }
 
-RC Table::scan_record(Trx *trx, ConditionFilter *filter,
-		      int limit, void *context,
-		      void (*record_reader)(const char *data, void *context))
-{
+RC Table::scan_record(Trx* trx, ConditionFilter* filter, int limit, void* context,
+    void (*record_reader)(const char* data, void* context)) {
   RecordReaderScanAdapter adapter(record_reader, context);
-  return scan_record(trx, filter, limit, (void *)&adapter, scan_record_reader_adapter);
+  return scan_record(trx, filter, limit, (void*)&adapter, scan_record_reader_adapter);
 }
 
-RC Table::scan_record(Trx *trx, ConditionFilter *filter, int limit, void *context,
-                      RC (*record_reader)(Record *record, void *context))
-{
+RC Table::scan_record(
+    Trx* trx, ConditionFilter* filter, int limit, void* context, RC (*record_reader)(Record* record, void* context)) {
   if (nullptr == record_reader) {
     return RC::INVALID_ARGUMENT;
   }
@@ -422,7 +405,7 @@ RC Table::scan_record(Trx *trx, ConditionFilter *filter, int limit, void *contex
     limit = INT_MAX;
   }
 
-  IndexScanner *index_scanner = find_index_for_scan(filter);
+  IndexScanner* index_scanner = find_index_for_scan(filter);
   if (index_scanner != nullptr) {
     return scan_record_by_index(trx, index_scanner, filter, limit, context, record_reader);
   }
@@ -456,10 +439,8 @@ RC Table::scan_record(Trx *trx, ConditionFilter *filter, int limit, void *contex
   return rc;
 }
 
-RC Table::scan_record_by_index(Trx *trx, IndexScanner *scanner, ConditionFilter *filter,
-                               int limit, void *context,
-                               RC (*record_reader)(Record *, void *))
-{
+RC Table::scan_record_by_index(Trx* trx, IndexScanner* scanner, ConditionFilter* filter, int limit, void* context,
+    RC (*record_reader)(Record*, void*)) {
   RC rc = RC::SUCCESS;
   RID rid;
   Record record;
@@ -497,38 +478,37 @@ RC Table::scan_record_by_index(Trx *trx, IndexScanner *scanner, ConditionFilter 
 }
 
 class IndexInserter {
-public:
-  explicit IndexInserter(Index *index) : index_(index)
-  {}
+ public:
+  explicit IndexInserter(Index* index) : index_(index) {
+  }
 
-  RC insert_index(const Record *record)
-  {
+  RC insert_index(const Record* record) {
     return index_->insert_entry(record->data(), &record->rid());
   }
 
-private:
-  Index *index_;
+ private:
+  Index* index_;
 };
 
-static RC insert_index_record_reader_adapter(Record *record, void *context)
-{
-  IndexInserter &inserter = *(IndexInserter *)context;
+static RC insert_index_record_reader_adapter(Record* record, void* context) {
+  IndexInserter& inserter = *(IndexInserter*)context;
   return inserter.insert_index(record);
 }
 
-RC Table::create_index(Trx *trx, const char *index_name, const char *attribute_name)
-{
+RC Table::create_index(Trx* trx, const char* index_name, const char* attribute_name) {
   if (common::is_blank(index_name) || common::is_blank(attribute_name)) {
     LOG_INFO("Invalid input arguments, table name is %s, index_name is blank or attribute_name is blank", name());
     return RC::INVALID_ARGUMENT;
   }
   if (table_meta_.index(index_name) != nullptr || table_meta_.find_index_by_field((attribute_name))) {
     LOG_INFO("Invalid input arguments, table name is %s, index %s exist or attribute %s exist index",
-             name(), index_name, attribute_name);
+        name(),
+        index_name,
+        attribute_name);
     return RC::SCHEMA_INDEX_EXIST;
   }
 
-  const FieldMeta *field_meta = table_meta_.field(attribute_name);
+  const FieldMeta* field_meta = table_meta_.field(attribute_name);
   if (!field_meta) {
     LOG_INFO("Invalid input arguments, there is no field of %s in table:%s.", attribute_name, name());
     return RC::SCHEMA_FIELD_MISSING;
@@ -537,13 +517,12 @@ RC Table::create_index(Trx *trx, const char *index_name, const char *attribute_n
   IndexMeta new_index_meta;
   RC rc = new_index_meta.init(index_name, *field_meta);
   if (rc != RC::SUCCESS) {
-    LOG_INFO("Failed to init IndexMeta in table:%s, index_name:%s, field_name:%s",
-             name(), index_name, attribute_name);
+    LOG_INFO("Failed to init IndexMeta in table:%s, index_name:%s, field_name:%s", name(), index_name, attribute_name);
     return rc;
   }
 
   // 创建索引相关数据
-  BplusTreeIndex *index = new BplusTreeIndex();
+  BplusTreeIndex* index = new BplusTreeIndex();
   std::string index_file = table_index_file(base_dir_.c_str(), name(), index_name);
   rc = index->create(index_file.c_str(), new_index_meta, *field_meta);
   if (rc != RC::SUCCESS) {
@@ -605,19 +584,17 @@ RC Table::create_index(Trx *trx, const char *index_name, const char *attribute_n
   return rc;
 }
 
-RC Table::update_record(Trx *trx, const char *attribute_name, const Value *value, int condition_num,
-    const Condition conditions[], int *updated_count)
-{
+RC Table::update_record(Trx* trx, const char* attribute_name, const Value* value, int condition_num,
+    const Condition conditions[], int* updated_count) {
   return RC::GENERIC_ERROR;
 }
 
 class RecordDeleter {
-public:
-  RecordDeleter(Table &table, Trx *trx) : table_(table), trx_(trx)
-  {}
+ public:
+  RecordDeleter(Table& table, Trx* trx) : table_(table), trx_(trx) {
+  }
 
-  RC delete_record(Record *record)
-  {
+  RC delete_record(Record* record) {
     RC rc = RC::SUCCESS;
     rc = table_.delete_record(trx_, record);
     if (rc == RC::SUCCESS) {
@@ -626,25 +603,22 @@ public:
     return rc;
   }
 
-  int deleted_count() const
-  {
+  int deleted_count() const {
     return deleted_count_;
   }
 
-private:
-  Table &table_;
-  Trx *trx_;
+ private:
+  Table& table_;
+  Trx* trx_;
   int deleted_count_ = 0;
 };
 
-static RC record_reader_delete_adapter(Record *record, void *context)
-{
-  RecordDeleter &record_deleter = *(RecordDeleter *)context;
+static RC record_reader_delete_adapter(Record* record, void* context) {
+  RecordDeleter& record_deleter = *(RecordDeleter*)context;
   return record_deleter.delete_record(record);
 }
 
-RC Table::delete_record(Trx *trx, ConditionFilter *filter, int *deleted_count)
-{
+RC Table::delete_record(Trx* trx, ConditionFilter* filter, int* deleted_count) {
   RecordDeleter deleter(*this, trx);
   RC rc = scan_record(trx, filter, -1, &deleter, record_reader_delete_adapter);
   if (deleted_count != nullptr) {
@@ -653,8 +627,7 @@ RC Table::delete_record(Trx *trx, ConditionFilter *filter, int *deleted_count)
   return rc;
 }
 
-RC Table::delete_record(Trx *trx, Record *record)
-{
+RC Table::delete_record(Trx* trx, Record* record) {
   RC rc = RC::SUCCESS;
   if (trx != nullptr) {
     rc = trx->delete_record(this, record);
@@ -662,7 +635,10 @@ RC Table::delete_record(Trx *trx, Record *record)
     rc = delete_entry_of_indexes(record->data(), record->rid(), false);  // 重复代码 refer to commit_delete
     if (rc != RC::SUCCESS) {
       LOG_ERROR("Failed to delete indexes of record (rid=%d.%d). rc=%d:%s",
-                 record->rid().page_num, record->rid().slot_num, rc, strrc(rc));
+          record->rid().page_num,
+          record->rid().slot_num,
+          rc,
+          strrc(rc));
     } else {
       rc = record_handler_->delete_record(&record->rid());
     }
@@ -670,8 +646,7 @@ RC Table::delete_record(Trx *trx, Record *record)
   return rc;
 }
 
-RC Table::commit_delete(Trx *trx, const RID &rid)
-{
+RC Table::commit_delete(Trx* trx, const RID& rid) {
   RC rc = RC::SUCCESS;
   Record record;
   rc = record_handler_->get_record(&rid, &record);
@@ -681,7 +656,10 @@ RC Table::commit_delete(Trx *trx, const RID &rid)
   rc = delete_entry_of_indexes(record.data(), record.rid(), false);
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to delete indexes of record(rid=%d.%d). rc=%d:%s",
-        rid.page_num, rid.slot_num, rc, strrc(rc));  // panic?
+        rid.page_num,
+        rid.slot_num,
+        rc,
+        strrc(rc));  // panic?
   }
 
   rc = record_handler_->delete_record(&rid);
@@ -692,8 +670,7 @@ RC Table::commit_delete(Trx *trx, const RID &rid)
   return rc;
 }
 
-RC Table::rollback_delete(Trx *trx, const RID &rid)
-{
+RC Table::rollback_delete(Trx* trx, const RID& rid) {
   RC rc = RC::SUCCESS;
   Record record;
   rc = record_handler_->get_record(&rid, &record);
@@ -704,10 +681,9 @@ RC Table::rollback_delete(Trx *trx, const RID &rid)
   return trx->rollback_delete(this, record);  // update record in place
 }
 
-RC Table::insert_entry_of_indexes(const char *record, const RID &rid)
-{
+RC Table::insert_entry_of_indexes(const char* record, const RID& rid) {
   RC rc = RC::SUCCESS;
-  for (Index *index : indexes_) {
+  for (Index* index : indexes_) {
     rc = index->insert_entry(record, &rid);
     if (rc != RC::SUCCESS) {
       break;
@@ -716,10 +692,9 @@ RC Table::insert_entry_of_indexes(const char *record, const RID &rid)
   return rc;
 }
 
-RC Table::delete_entry_of_indexes(const char *record, const RID &rid, bool error_on_not_exists)
-{
+RC Table::delete_entry_of_indexes(const char* record, const RID& rid, bool error_on_not_exists) {
   RC rc = RC::SUCCESS;
-  for (Index *index : indexes_) {
+  for (Index* index : indexes_) {
     rc = index->delete_entry(record, &rid);
     if (rc != RC::SUCCESS) {
       if (rc != RC::RECORD_INVALID_KEY || !error_on_not_exists) {
@@ -730,29 +705,26 @@ RC Table::delete_entry_of_indexes(const char *record, const RID &rid, bool error
   return rc;
 }
 
-Index *Table::find_index(const char *index_name) const
-{
-  for (Index *index : indexes_) {
+Index* Table::find_index(const char* index_name) const {
+  for (Index* index : indexes_) {
     if (0 == strcmp(index->index_meta().name(), index_name)) {
       return index;
     }
   }
   return nullptr;
 }
-Index *Table::find_index_by_field(const char *field_name) const
-{
-  const TableMeta &table_meta = this->table_meta();
-  const IndexMeta *index_meta = table_meta.find_index_by_field(field_name);
+Index* Table::find_index_by_field(const char* field_name) const {
+  const TableMeta& table_meta = this->table_meta();
+  const IndexMeta* index_meta = table_meta.find_index_by_field(field_name);
   if (index_meta != nullptr) {
     return this->find_index(index_meta->name());
   }
   return nullptr;
 }
 
-IndexScanner *Table::find_index_for_scan(const DefaultConditionFilter &filter)
-{
-  const ConDesc *field_cond_desc = nullptr;
-  const ConDesc *value_cond_desc = nullptr;
+IndexScanner* Table::find_index_for_scan(const DefaultConditionFilter& filter) {
+  const ConDesc* field_cond_desc = nullptr;
+  const ConDesc* value_cond_desc = nullptr;
   if (filter.left().is_attr && !filter.right().is_attr) {
     field_cond_desc = &filter.left();
     value_cond_desc = &filter.right();
@@ -764,59 +736,54 @@ IndexScanner *Table::find_index_for_scan(const DefaultConditionFilter &filter)
     return nullptr;
   }
 
-  const FieldMeta *field_meta = table_meta_.find_field_by_offset(field_cond_desc->attr_offset);
+  const FieldMeta* field_meta = table_meta_.find_field_by_offset(field_cond_desc->attr_offset);
   if (nullptr == field_meta) {
     LOG_PANIC("Cannot find field by offset %d. table=%s", field_cond_desc->attr_offset, name());
     return nullptr;
   }
 
-  const IndexMeta *index_meta = table_meta_.find_index_by_field(field_meta->name());
+  const IndexMeta* index_meta = table_meta_.find_index_by_field(field_meta->name());
   if (nullptr == index_meta) {
     return nullptr;
   }
 
-  Index *index = find_index(index_meta->name());
+  Index* index = find_index(index_meta->name());
   if (nullptr == index) {
     return nullptr;
   }
 
-  const char *left_key = nullptr;
-  const char *right_key = nullptr;
+  const char* left_key = nullptr;
+  const char* right_key = nullptr;
   int left_len = 4;
   int right_len = 4;
   bool left_inclusive = false;
   bool right_inclusive = false;
   switch (filter.comp_op()) {
-  case EQUAL_TO: {
-    left_key = (const char *)value_cond_desc->value;
-    right_key = (const char *)value_cond_desc->value;
-    left_inclusive = true;
-    right_inclusive = true;
-  }
-    break;
-  case LESS_EQUAL: {
-    right_key = (const char *)value_cond_desc->value;
-    right_inclusive = true;
-  }
-    break;
-  case GREAT_EQUAL: {
-    left_key = (const char *)value_cond_desc->value;
-    left_inclusive = true;
-  }
-    break;
-  case LESS_THAN: {
-    right_key = (const char *)value_cond_desc->value;
-    right_inclusive = false;
-  }
-    break;
-  case GREAT_THAN: {
-    left_key = (const char *)value_cond_desc->value;
-    left_inclusive = false;
-  }
-    break;
-  default: {
-    return nullptr;
-  }
+    case EQUAL_TO: {
+      left_key = (const char*)value_cond_desc->value;
+      right_key = (const char*)value_cond_desc->value;
+      left_inclusive = true;
+      right_inclusive = true;
+    } break;
+    case LESS_EQUAL: {
+      right_key = (const char*)value_cond_desc->value;
+      right_inclusive = true;
+    } break;
+    case GREAT_EQUAL: {
+      left_key = (const char*)value_cond_desc->value;
+      left_inclusive = true;
+    } break;
+    case LESS_THAN: {
+      right_key = (const char*)value_cond_desc->value;
+      right_inclusive = false;
+    } break;
+    case GREAT_THAN: {
+      left_key = (const char*)value_cond_desc->value;
+      left_inclusive = false;
+    } break;
+    default: {
+      return nullptr;
+    }
   }
 
   if (filter.attr_type() == CHARS) {
@@ -826,23 +793,22 @@ IndexScanner *Table::find_index_for_scan(const DefaultConditionFilter &filter)
   return index->create_scanner(left_key, left_len, left_inclusive, right_key, right_len, right_inclusive);
 }
 
-IndexScanner *Table::find_index_for_scan(const ConditionFilter *filter)
-{
+IndexScanner* Table::find_index_for_scan(const ConditionFilter* filter) {
   if (nullptr == filter) {
     return nullptr;
   }
 
   // remove dynamic_cast
-  const DefaultConditionFilter *default_condition_filter = dynamic_cast<const DefaultConditionFilter *>(filter);
+  const DefaultConditionFilter* default_condition_filter = dynamic_cast<const DefaultConditionFilter*>(filter);
   if (default_condition_filter != nullptr) {
     return find_index_for_scan(*default_condition_filter);
   }
 
-  const CompositeConditionFilter *composite_condition_filter = dynamic_cast<const CompositeConditionFilter *>(filter);
+  const CompositeConditionFilter* composite_condition_filter = dynamic_cast<const CompositeConditionFilter*>(filter);
   if (composite_condition_filter != nullptr) {
     int filter_num = composite_condition_filter->filter_num();
     for (int i = 0; i < filter_num; i++) {
-      IndexScanner *scanner = find_index_for_scan(&composite_condition_filter->filter(i));
+      IndexScanner* scanner = find_index_for_scan(&composite_condition_filter->filter(i));
       if (scanner != nullptr) {
         return scanner;  // 可以找到一个最优的，比如比较符号是=
       }
@@ -851,19 +817,21 @@ IndexScanner *Table::find_index_for_scan(const ConditionFilter *filter)
   return nullptr;
 }
 
-RC Table::sync()
-{
+RC Table::sync() {
   RC rc = data_buffer_pool_->flush_all_pages();
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to flush table's data pages. table=%s, rc=%d:%s", name(), rc, strrc(rc));
     return rc;
   }
 
-  for (Index *index : indexes_) {
+  for (Index* index : indexes_) {
     rc = index->sync();
     if (rc != RC::SUCCESS) {
       LOG_ERROR("Failed to flush index's pages. table=%s, index=%s, rc=%d:%s",
-          name(), index->index_meta().name(), rc, strrc(rc));
+          name(),
+          index->index_meta().name(),
+          rc,
+          strrc(rc));
       return rc;
     }
   }

@@ -21,20 +21,19 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-TEST(test_record_page_handler, test_record_page_handler)
-{
-  const char *record_manager_file = "record_manager.bp";
+TEST(test_record_page_handler, test_record_page_handler) {
+  const char* record_manager_file = "record_manager.bp";
   ::remove(record_manager_file);
 
-  BufferPoolManager *bpm = new BufferPoolManager();
-  DiskBufferPool *bp = nullptr;
+  BufferPoolManager* bpm = new BufferPoolManager();
+  DiskBufferPool* bp = nullptr;
   RC rc = bpm->create_file(record_manager_file);
   ASSERT_EQ(rc, RC::SUCCESS);
-  
+
   rc = bpm->open_file(record_manager_file, bp);
   ASSERT_EQ(rc, RC::SUCCESS);
 
-  Frame *frame = nullptr;
+  Frame* frame = nullptr;
   rc = bp->allocate_page(&frame);
   ASSERT_EQ(rc, RC::SUCCESS);
 
@@ -106,16 +105,15 @@ TEST(test_record_page_handler, test_record_page_handler)
   bpm->close_file(record_manager_file);
 }
 
-TEST(test_record_page_handler, test_record_file_iterator)
-{
-  const char *record_manager_file = "record_manager.bp";
+TEST(test_record_page_handler, test_record_file_iterator) {
+  const char* record_manager_file = "record_manager.bp";
   ::remove(record_manager_file);
 
-  BufferPoolManager *bpm = new BufferPoolManager();
-  DiskBufferPool *bp = nullptr;
+  BufferPoolManager* bpm = new BufferPoolManager();
+  DiskBufferPool* bp = nullptr;
   RC rc = bpm->create_file(record_manager_file);
   ASSERT_EQ(rc, RC::SUCCESS);
-  
+
   rc = bpm->open_file(record_manager_file, bp);
   ASSERT_EQ(rc, RC::SUCCESS);
 
@@ -136,7 +134,7 @@ TEST(test_record_page_handler, test_record_file_iterator)
   }
   file_scanner.close_scan();
   ASSERT_EQ(count, 0);
-  
+
   const int record_insert_num = 1000;
   char record_data[20];
   std::vector<RID> rids;
@@ -158,7 +156,7 @@ TEST(test_record_page_handler, test_record_file_iterator)
   }
   file_scanner.close_scan();
   ASSERT_EQ(count, rids.size());
-  
+
   for (int i = 0; i < record_insert_num; i += 2) {
     rc = file_handler.delete_record(&rids[i]);
     ASSERT_EQ(rc, RC::SUCCESS);
@@ -175,12 +173,11 @@ TEST(test_record_page_handler, test_record_file_iterator)
   }
   file_scanner.close_scan();
   ASSERT_EQ(count, rids.size() / 2);
-  
+
   bpm->close_file(record_manager_file);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   // 分析gtest程序的命令行参数
   testing::InitGoogleTest(&argc, argv);
 

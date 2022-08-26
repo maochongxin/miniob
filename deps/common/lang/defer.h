@@ -18,24 +18,22 @@ See the Mulan PSL v2 for more details. */
 
 namespace common {
 
-class DeferHelper
-{
-public: 
-  DeferHelper(const std::function<void()> defer) : defer_(std::move(defer))
-  {}
+class DeferHelper {
+ public:
+  DeferHelper(const std::function<void()> defer) : defer_(std::move(defer)) {
+  }
 
-  ~DeferHelper()
-  {
+  ~DeferHelper() {
     if (defer_) {
       defer_();
     }
   }
 
-private:
+ private:
   const std::function<void()> defer_;
 };
 
-} // namespace common
+}  // namespace common
 
 #define DERFER_NAME(suffix) defer_helper_##suffix
 #define DEFER(callback) common::DeferHelper DERFER_NAME(__LINE__)(callback)
