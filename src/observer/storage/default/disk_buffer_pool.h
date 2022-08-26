@@ -34,7 +34,7 @@ class DiskBufferPool;
 
 //
 #define BP_INVALID_PAGE_NUM (-1)
-#define BP_PAGE_SIZE (1 << 13)
+#define BP_PAGE_SIZE (1 << 13) // 8kb
 #define BP_PAGE_DATA_SIZE (BP_PAGE_SIZE - sizeof(PageNum))
 #define BP_FILE_SUB_HDR_SIZE (sizeof(BPFileSubHeader))
 #define BP_BUFFER_SIZE 256
@@ -43,7 +43,7 @@ struct Page {
   PageNum page_num;
   char data[BP_PAGE_DATA_SIZE];
 };
-// sizeof(Page) should be equal to BP_PAGE_SIZE
+// sizeof(Page) should be equal to BP_PAGE_SIZE 8kb
 
 /**
  * BufferPool的文件第一个页面，存放一些元数据信息，包括了后面每页的分配信息。

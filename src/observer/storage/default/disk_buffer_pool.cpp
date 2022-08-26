@@ -171,7 +171,7 @@ RC DiskBufferPool::open_file(const char *file_name)
   }
 
   file_header_ = (BPFileHeader *)hdr_frame_->data();
-  file_header_->usage = new SimpleLRU<PageNum, bool>();
+
   LOG_INFO("Successfully open %s. file_desc=%d, hdr_frame=%p", file_name, file_desc_, hdr_frame_);
   return RC::SUCCESS;
 }
