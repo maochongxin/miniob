@@ -100,38 +100,7 @@ bool BufferPoolIterator::has_next() {
 
 PageNum BufferPoolIterator::next() {
   PageNum next_page = bitmap_.next_setted_bit(current_page_num_ + 1);
-  if (next_page != -1) {
-    current_page_num_ = next_page;
-  }
-  return next_page;
-}
-
-RC BufferPoolIterator::reset() {
-  current_page_num_ = 0;
-  return RC::SUCCESS;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-DiskBufferPool::DiskBufferPool(BufferPoolManager& bp_manager, BPFrameManager& frame_manager)
-    : bp_manager_(bp_manager), frame_manager_(frame_manager) {
-}
-
-DiskBufferPool::~DiskBufferPool() {
-  close_file();
-  LOG_INFO("Exit");
-}
-
 RC DiskBufferPool::open_file(const char* file_name) {
-  int fd;
-  if ((fd = open(file_name, O_RDWR)) < 0) {
-    LOG_ERROR("Failed to open file %s, because %s.", file_name, strerror(errno));
-    return RC::IOERR_ACCESS;
-  }
-  LOG_INFO("Successfully open file %s.", file_name);
-
-  file_name_ = file_name;
-  file_desc_ = fd;
-
   RC rc = RC::SUCCESS;
   rc = allocate_frame(&hdr_frame_);
   if (rc != RC::SUCCESS) {
