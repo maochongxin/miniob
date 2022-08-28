@@ -29,7 +29,7 @@ class BplusTreeIndex : public Index {
 
   RC insert_entry(const char* record, const RID* rid) override;
   RC delete_entry(const char* record, const RID* rid) override;
-
+  RC update_entry(const char* record, const RID* rid) override;
   /**
    * 扫描指定范围的数据
    */

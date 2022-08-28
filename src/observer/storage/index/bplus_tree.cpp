@@ -194,6 +194,13 @@ int LeafIndexNodeHandler::remove(const char* key, const KeyComparator& comparato
   return 0;
 }
 
+void LeafIndexNodeHandler::update(int index, const char* key, const char* value) {
+  assert(index >= 0 && index < size());
+  if (index < size()) {
+    memcpy(__item_at(index) + key_size(), value, value_size());
+  }
+}
+
 RC LeafIndexNodeHandler::move_half_to(LeafIndexNodeHandler& other, DiskBufferPool* bp) {
   const int size = this->size();
   const int move_index = size / 2;
@@ -1600,6 +1607,27 @@ RC BplusTreeHandler::delete_entry_internal(Frame* leaf_frame, const char* key) {
   return coalesce_or_redistribute<LeafIndexNodeHandler>(leaf_frame);
 }
 
+RC BplusTreeHandler::update_entry_internal(Frame* leaf_frame, const char* key, const RID* rid) {
+  LeafIndexNodeHandler leaf_index_node(file_header_, leaf_frame);
+  bool found = false;
+  int index = leaf_index_node.lookup(key_comparator_, key, &found);
+  if (!found) {
+    LOG_TRACE("no data to update");
+    disk_buffer_pool_->unpin_page(leaf_frame);
+    return RC::RECORD_RECORD_NOT_EXIST;
+  }
+  leaf_index_node.update(index, key, (const char*)rid);
+
+  leaf_frame->mark_dirty();
+
+  if (leaf_index_node.size() >= leaf_index_node.min_size()) {
+    disk_buffer_pool_->unpin_page(leaf_frame);
+    return RC::SUCCESS;
+  }
+
+  return coalesce_or_redistribute<LeafIndexNodeHandler>(leaf_frame);
+}
+
 RC BplusTreeHandler::delete_entry(const char* user_key, const RID* rid) {
   char* key = (char*)mem_pool_item_->alloc();
   if (nullptr == key) {
@@ -1619,6 +1647,32 @@ RC BplusTreeHandler::delete_entry(const char* user_key, const RID* rid) {
   rc = delete_entry_internal(leaf_frame, key);
   if (rc != RC::SUCCESS) {
     LOG_WARN("Failed to delete index");
+    mem_pool_item_->free(key);
+    return rc;
+  }
+  mem_pool_item_->free(key);
+  return RC::SUCCESS;
+}
+
+RC BplusTreeHandler::update_entry(const char* user_key, const RID* rid) {
+  char* key = (char*)mem_pool_item_->alloc();
+  if (key == nullptr) {
+    LOG_WARN("Failed to alloc memory for key. size=%d", file_header_.key_length);
+    return RC::NOMEM;
+  }
+  memcpy(key, user_key, file_header_.attr_length);
+  memcpy(key + file_header_.attr_length, rid, sizeof(*rid));
+
+  Frame* leaf_frame;
+  RC rc = find_leaf(key, leaf_frame);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to find leaf page. rc =%d:%s", rc, strrc(rc));
+    mem_pool_item_->free(key);
+    return rc;
+  }
+  rc = update_entry_internal(leaf_frame, key, rid);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("Failed to update index");
     mem_pool_item_->free(key);
     return rc;
   }

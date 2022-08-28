@@ -133,16 +133,10 @@ class BufferPoolIterator {
   bool has_next();
   PageNum next();
   RC reset();
-<<<<<<< HEAD
 
- private:
-  common::Bitmap bitmap_;
-  PageNum current_page_num_ = -1;
-=======
 private:
   common::Cache<common::SimpleLRU<PageNum, bool>>* pusage;
   PageNum  current_page_num_ = -1;
->>>>>>> 7d42cc118468014a09f7b9fd88291da7d717b531
 };
 
 class DiskBufferPool {

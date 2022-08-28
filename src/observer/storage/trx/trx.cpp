@@ -67,6 +67,20 @@ RC Trx::insert_record(Table* table, Record* record) {
   return rc;
 }
 
+RC Trx::update_record(Table* table, Record* record) {
+  RC rc = RC::SUCCESS;
+  Operation* old_oper = find_operation(table, record->rid());
+  if (old_oper != nullptr) {
+    if (old_oper->type() == Operation::Type::INSERT) {
+      delete_operation(table, record->rid());
+      insert_operation(table, Operation::Type::UPDATE, record->rid());
+      return RC::SUCCESS;
+    } else {
+      return RC::GENERIC_ERROR;
+    }
+  }
+}
+
 RC Trx::delete_record(Table* table, Record* record) {
   RC rc = RC::SUCCESS;
   start_if_not_started();

@@ -290,6 +290,7 @@ class LeafIndexNodeHandler : public IndexNodeHandler {
 
   void insert(int index, const char* key, const char* value);
   void remove(int index);
+  void update(int index, const char* key, const char* value);
   int remove(const char* key, const KeyComparator& comparator);
   RC move_half_to(LeafIndexNodeHandler& other, DiskBufferPool* bp);
   RC move_first_to_end(LeafIndexNodeHandler& other, DiskBufferPool* disk_buffer_pool);
@@ -410,6 +411,8 @@ class BplusTreeHandler {
    */
   RC delete_entry(const char* user_key, const RID* rid);
 
+  RC update_entry(const char* user_key, const RID* rid);
+
   bool is_empty() const;
 
   /**
@@ -449,7 +452,7 @@ class BplusTreeHandler {
   RC insert_into_parent(PageNum parent_page, Frame* left_frame, const char* pkey, Frame& right_frame);
 
   RC delete_entry_internal(Frame* leaf_frame, const char* key);
-
+  RC update_entry_internal(Frame* leaf_frame, const char* key, const RID* rid);
   RC insert_into_new_root(Frame* left_frame, const char* pkey, Frame& right_frame);
 
   template <typename IndexNodeHandlerType>

@@ -52,8 +52,8 @@ python3 miniob_test.py \
         --test-result-dir=result \
         --test-result-tmp-dir=./result_tmp \
         --use-unix-socket \
-        --git-repo=https://github.com/oceanbase/miniob.git \
-        --git-branch=main \
+        --git-repo=https://github.com/maochongxin/miniob.git \
+        --git-branch=mcx-dev \
         --code-type=git \
         --target-dir=./miniob \
         --log=stdout \

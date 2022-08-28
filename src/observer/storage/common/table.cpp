@@ -584,9 +584,67 @@ RC Table::create_index(Trx* trx, const char* index_name, const char* attribute_n
   return rc;
 }
 
+RC Table::update_record(Trx* trx, Record* record) {
+  RC rc = RC::SUCCESS;
+  if (trx != nullptr) {
+    rc = trx->update_record(this, record);
+  } else {
+    rc = update_entry_of_indexes(record->data(), record->rid());  // 重复代码 refer to commit_delete
+    if (rc != RC::SUCCESS) {
+      LOG_ERROR("Failed to delete indexes of record (rid=%d.%d). rc=%d:%s",
+          record->rid().page_num,
+          record->rid().slot_num,
+          rc,
+          strrc(rc));
+    } else {
+      rc = record_handler_->update_record(record);
+    }
+  }
+  return rc;
+}
+
+
+class RecordUpdater {
+ public:
+  RecordUpdater(Table& table, Trx* trx) : table_(table), trx_(trx) {}
+
+  RC update_record(Record* record) {
+    RC rc = table_.update_record(trx_, record);
+    if (rc == RC::SUCCESS) {
+      update_count_++;
+    }
+    return rc;
+  }
+
+  int update_count() const {
+    return update_count_;
+  }
+
+ private:
+  Table& table_;
+  Trx* trx_;
+  int update_count_ = 0;
+};
+
+
+static RC record_reader_update_adapter(Record* record, void* context) {
+  RecordUpdater& record_updater = *(RecordUpdater*)context;
+  return record_updater.update_record(record);
+}
+
 RC Table::update_record(Trx* trx, const char* attribute_name, const Value* value, int condition_num,
     const Condition conditions[], int* updated_count) {
-  return RC::GENERIC_ERROR;
+  RecordUpdater updater(*this, trx);
+  CompositeConditionFilter condition_filter;
+  RC rc = condition_filter.init(*this, conditions, condition_num);
+  if (rc != RC::SUCCESS) {
+    return rc;
+  }
+  rc = scan_record(trx, &condition_filter, -1, &updater, record_reader_update_adapter);
+  if (updated_count != nullptr) {
+    *updated_count = updater.update_count();
+  }
+  return RC::SUCCESS;
 }
 
 class RecordDeleter {
@@ -685,6 +743,17 @@ RC Table::insert_entry_of_indexes(const char* record, const RID& rid) {
   RC rc = RC::SUCCESS;
   for (Index* index : indexes_) {
     rc = index->insert_entry(record, &rid);
+    if (rc != RC::SUCCESS) {
+      break;
+    }
+  }
+  return rc;
+}
+
+RC Table::update_entry_of_indexes(const char* record, const RID& rid) {
+  RC rc = RC::SUCCESS;
+  for (Index* index : indexes_) {
+    rc = index->update_entry(record, &rid);
     if (rc != RC::SUCCESS) {
       break;
     }
