@@ -17,6 +17,8 @@ See the Mulan PSL v2 for more details. */
 #include "storage/common/db.h"
 #include "storage/common/table.h"
 
+
+// INSERT into table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...)
 InsertStmt::InsertStmt(Table* table, const Value* values, int value_amount)
     : table_(table), values_(values), value_amount_(value_amount) {
 }
@@ -40,7 +42,7 @@ RC InsertStmt::create(Db* db, const Inserts& inserts, Stmt*& stmt) {
   const int value_num = inserts.value_num;
   const TableMeta& table_meta = table->table_meta();
   const int field_num = table_meta.field_num() - table_meta.sys_field_num();
-  if (field_num != value_num) {
+  if (field_num != value_num) { // 不允许缺省
     LOG_WARN("schema mismatch. value num=%d, field num in schema=%d", value_num, field_num);
     return RC::SCHEMA_FIELD_MISSING;
   }

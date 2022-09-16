@@ -135,7 +135,7 @@ void ExecuteStage::handle_request(common::StageEvent* event) {
         do_insert(sql_event);
       } break;
       case StmtType::UPDATE: {
-        // do_update((UpdateStmt *)stmt, session_event);
+        do_update(sql_event);
       } break;
       case StmtType::DELETE: {
         do_delete(sql_event);
@@ -519,6 +519,20 @@ RC ExecuteStage::do_insert(SQLStageEvent* sql_event) {
     session_event->set_response("FAILURE\n");
   }
   return rc;
+}
+
+RC ExecuteStage::do_update(SQLStageEvent* sql_event) {
+  Stmt* stmt = sql_event->stmt();
+  SessionEvent* session_event = sql_event->session_event();
+
+  if (stmp == nullptr) {
+    LOG_WARN("cannot find statment");
+    return RC::GENERIC_ERROR;
+  }
+  UodateStmt* update_stmt = (UpdateStmt*)stmt;
+  Table* table = update_stmt->table();
+  RC rc = table->update_record(nullptr, inser)
+
 }
 
 RC ExecuteStage::do_delete(SQLStageEvent* sql_event) {
