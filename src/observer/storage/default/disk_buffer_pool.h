@@ -109,6 +109,7 @@ class Frame {
   Page page_;
 };
 
+// BufferPoolFrameManager
 class BPFrameManager : public common::MemPoolSimple<Frame> {
  public:
   BPFrameManager(const char* tag);

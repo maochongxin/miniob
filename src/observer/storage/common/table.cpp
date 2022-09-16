@@ -211,6 +211,8 @@ RC Table::rollback_insert(Trx* trx, const RID& rid) {
   return rc;
 }
 
+
+// raw insert record
 RC Table::insert_record(Trx* trx, Record* record) {
   RC rc = RC::SUCCESS;
 
@@ -259,6 +261,8 @@ RC Table::insert_record(Trx* trx, Record* record) {
   }
   return rc;
 }
+
+// pack value into a record; insert record
 RC Table::insert_record(Trx* trx, int value_num, const Value* values) {
   if (value_num <= 0 || nullptr == values) {
     LOG_ERROR("Invalid argument. table name: %s, value num=%d, values=%p", name(), value_num, values);
@@ -645,6 +649,41 @@ RC Table::update_record(Trx* trx, const char* attribute_name, const Value* value
     *updated_count = updater.update_count();
   }
   return RC::SUCCESS;
+}
+
+RC Table::commit_update(Trx* trx, const RID& rid) {
+  RC rc = RC::SUCCESS;
+  Record record;
+  rc = record_handler_->get_record(&rid, &record);
+  if (rc != RC::SUCCESS) {
+    return rc;
+  }
+  rc = update_entry_of_indexes(record.data(), record.rid());
+  if (rc != RC::SUCCESS) {
+    LOG_ERROR("Failed to update indexes of record(rid=%d.%d). rc=%d:%s",
+        rid.page_num,
+        rid.slot_num,
+        rc,
+        strrc(rc));  // panic?
+  }
+
+  rc = record_handler_->update_record(&record);
+  if (rc != RC::SUCCESS) {
+    return rc;
+  }
+
+  return rc;
+}
+
+RC Table::rollback_update(Trx* trx, const RID& rid) {
+  RC rc = RC::SUCCESS;
+  Record record;
+  rc = record_handler_->get_record(&rid, &record);
+  if (rc != RC::SUCCESS) {
+    return rc;
+  }
+
+  return trx->rollback_update(this, record); 
 }
 
 class RecordDeleter {

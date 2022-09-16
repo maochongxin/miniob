@@ -209,7 +209,7 @@ struct IndexNode {
  * the key is in format: the key value of record and rid.
  * so the key in leaf page must be unique.
  * the value is rid.
- * can you implenment a cluster index ?
+ * can you implenment a cluster index ? TODO:(maochongxin)
  */
 struct LeafIndexNode : public IndexNode {
   static constexpr int HEADER_SIZE = IndexNode::HEADER_SIZE + 8;
@@ -229,7 +229,7 @@ struct LeafIndexNode : public IndexNode {
  * | key(0),page_id(0) | key(1), page_id(1) | ... | key(n), page_id(n) |
  *
  * the first key is ignored(key0).
- * so it will waste space, can you fix this?
+ * so it will waste space, can you fix this? TODO:(maochongxin)
  */
 struct InternalIndexNode : public IndexNode {
   static constexpr int HEADER_SIZE = IndexNode::HEADER_SIZE;
@@ -284,7 +284,7 @@ class LeafIndexNodeHandler : public IndexNodeHandler {
   /**
    * 查找指定key的插入位置(注意不是key本身)
    * 如果key已经存在，会设置found的值
-   * NOTE: 当前lookup的实现效率非常低，你是否可以优化它?
+   * NOTE: TODO:(maochongxin)[二分查找] 当前lookup的实现效率非常低，你是否可以优化它?
    */
   int lookup(const KeyComparator& comparator, const char* key, bool* found = nullptr) const;
 

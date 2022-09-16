@@ -26,6 +26,7 @@ See the Mulan PSL v2 for more details. */
 
 class Field;
 
+// Record 的元信息
 struct RID {
   PageNum page_num;  // record's page number
   SlotNum slot_num;  // record's slot number
@@ -75,6 +76,7 @@ struct RID {
   }
 };
 
+// 一条写入记录
 class Record {
  public:
   Record() = default;

@@ -586,6 +586,9 @@ RC InternalIndexNodeHandler::preappend(const char* item, DiskBufferPool* bp) {
   return RC::SUCCESS;
 }
 
+// TODO: 实现lower_bound 加速found查找
+
+
 char* InternalIndexNodeHandler::__item_at(int index) const {
   return internal_node_->array + (index * item_size());
 }
