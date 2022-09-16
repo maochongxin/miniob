@@ -531,7 +531,7 @@ RC ExecuteStage::do_update(SQLStageEvent* sql_event) {
   }
   UodateStmt* update_stmt = (UpdateStmt*)stmt;
   Table* table = update_stmt->table();
-  RC rc = table->update_record(nullptr, inser)
+  RC rc = table->update_record(nullptr, inser);
 
 }
 
