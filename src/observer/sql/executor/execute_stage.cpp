@@ -30,6 +30,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/table_scan_operator.h"
 #include "sql/operator/index_scan_operator.h"
 #include "sql/operator/predicate_operator.h"
+#include "sql/operator/update_operator.h"
 #include "sql/operator/delete_operator.h"
 #include "sql/operator/project_operator.h"
 #include "sql/stmt/stmt.h"
@@ -525,7 +526,7 @@ RC ExecuteStage::do_update(SQLStageEvent* sql_event) {
   Stmt* stmt = sql_event->stmt();
   SessionEvent* session_event = sql_event->session_event();
 
-  if (stmp == nullptr) {
+  if (stmt == nullptr) {
     LOG_WARN("cannot find statment");
     return RC::GENERIC_ERROR;
   }
@@ -538,8 +539,7 @@ RC ExecuteStage::do_update(SQLStageEvent* sql_event) {
   update_oper.add_child(&pred_oper);
 
 
-  Table* table = update_stmt->table();
-  RC rc = table->update_record(nullptr, update_stmt->filter_stmt());
+  RC rc = update_oper.open();
   if (rc == RC::SUCCESS) {
     session_event->set_response("SUCCESS\n");
   } else {

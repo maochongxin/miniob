@@ -94,6 +94,7 @@ class Trx {
 
   RC commit_insert(Table* table, Record& record);
   RC rollback_delete(Table* table, Record& record);
+  RC rollback_update(Table* table, Record& record);
 
   bool is_visible(Table* table, const Record* record);
 

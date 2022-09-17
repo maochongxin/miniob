@@ -16,8 +16,10 @@ See the Mulan PSL v2 for more details. */
 
 #include "rc.h"
 #include "sql/stmt/stmt.h"
+#include "sql/parser/parse_defs.h"
 
 class Table;
+class FilterStmt;
 
 class UpdateStmt : public Stmt {
  public:

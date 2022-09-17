@@ -25,4 +25,4 @@ class UpdateOperator : public Operator {
   // RC tuple_cell_spec_at(int index, TupleCellSpec &spec) const override
  private:
   UpdateStmt* update_stmt_ = nullptr;
-}
+};

@@ -36,13 +36,11 @@ RC UpdateOperator::open() {
     return RC::SUCCESS;
 }
 
-RC:: UpdateOperator::next() {
+RC UpdateOperator::next() {
     return RC::RECORD_EOF;
 }
 
-
-RC:: UpdateOperator::close() {
+RC UpdateOperator::close() {
+    children_[0]->close();
     return RC::SUCCESS;
 }
-
-

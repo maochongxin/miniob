@@ -27,6 +27,7 @@ class DefaultConditionFilter;
 class Index;
 class IndexScanner;
 class RecordDeleter;
+class RecordUpdater;
 class Trx;
 
 // TODO remove the routines with condition
@@ -54,9 +55,9 @@ class Table {
 
   RC insert_record(Trx* trx, int value_num, const Value* values);
   RC update_record(Trx* trx, Record* record);
-  RC update_record(Trx* trx, ConditionFilter* filter, int* update_count = nullptr)
+  RC update_record(Trx* trx, ConditionFilter* filter, int* update_count = nullptr);
   RC update_record(Trx* trx, const char* attribute_name, const Value* value, int condition_num,
-    ConditionFilter* filter, int* updated_count = nullptr);
+    const Condition conditions[], int* updated_count = nullptr);
   RC delete_record(Trx* trx, ConditionFilter* filter, int* deleted_count);
   RC delete_record(Trx* trx, Record* record);
 

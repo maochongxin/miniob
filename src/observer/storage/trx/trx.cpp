@@ -80,8 +80,7 @@ RC Trx::update_record(Table* table, Record* record) {
 
   start_if_not_started();
 
-  update_opertation();
-  insert_opreation(table, Operation::Type::UPDATE, record->rid());
+  insert_operation(table, Operation::Type::UPDATE, record->rid());
   return rc;
 }
 
@@ -230,6 +229,11 @@ RC Trx::rollback() {
 }
 
 RC Trx::commit_insert(Table* table, Record& record) {
+  set_record_trx_id(table, record, 0, false);
+  return RC::SUCCESS;
+}
+
+RC Trx::rollback_update(Table* table, Record& record) {
   set_record_trx_id(table, record, 0, false);
   return RC::SUCCESS;
 }

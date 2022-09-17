@@ -12,25 +12,31 @@ See the Mulan PSL v2 for more details. */
 // Created by Wangyunlai on 2022/5/22.
 //
 
+#include "common/log/log.h"
+#include "sql/stmt/filter_stmt.h"
 #include "sql/stmt/update_stmt.h"
+#include "storage/common/db.h"
+#include "storage/common/table.h"
+
+class Table;
+class FilterStmt;
+
 
 // UPDATE table_name SET column1 = value1, column2 = value2, ... WHERE condition;
 UpdateStmt::UpdateStmt(Table* table, Value* values, int value_amount, FilterStmt* filter_stmt)
     : table_(table), values_(values), value_amount_(value_amount), filter_stmt_(filter_stmt) {
 }
 
-RC FilterStmt* UpdateStmt::filter_stmt() {
-  return filter_stmt_;
-}
+
 
 RC UpdateStmt::create(Db* db, const Updates& update, Stmt*& stmt) {
   const char* table_name = update.relation_name;
   if (db == nullptr || table_name == nullptr || update.condition_num <= 0) {
-    LOG_WARNING("invalid argument. db=%p, table_name=%p, condition_num=%d", db, table_name, update.condition_name);
+    LOG_WARN("invalid argument. db=%p, table_name=%p, condition_num=%d", db, table_name, update.condition_num);
     return RC::INVALID_ARGUMENT;
   }
 
-  Table* table = db->find(table_name);
+  Table* table = db->find_table(table_name);
   if (!table) {
     LOG_WARN("no such table. db=%s, table_name=%s", db->name(), table_name);
     return RC::SCHEMA_TABLE_NOT_EXIST;
@@ -38,7 +44,7 @@ RC UpdateStmt::create(Db* db, const Updates& update, Stmt*& stmt) {
 
 
   const TableMeta& table_meta = table->table_meta();
-  const FieldMeta* field_meta = table_meta->field(update.attribute_name);
+  const FieldMeta* field_meta = table_meta.field(update.attribute_name);
   if (!field_meta) {
     LOG_WARN("field not found. table=%s, field=%s", table_name, field_meta->name());
     return RC::SCHEMA_FIELD_NOT_EXIST;
@@ -48,13 +54,13 @@ RC UpdateStmt::create(Db* db, const Updates& update, Stmt*& stmt) {
   table_map.insert(std::pair<std::string, Table*>(std::string(table_name), table));
 
   FilterStmt* filter_stmt = nullptr;
-  RC rc = FilterStmt::crete(db, table, &table_name, update.conditions, update.condition_name, filter_stmt);
+  RC rc = FilterStmt::create(db, table, &table_map, update.conditions, update.condition_num, filter_stmt);
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to create filter statement. rc=%d:%s", rc, strrc(rc));
     return rc;
   }
 
-  const Value& value = update.value;
+  Value value = update.value;
   stmt = new UpdateStmt(table, &value, 1, filter_stmt);
   return RC::SUCCESS;
 }
