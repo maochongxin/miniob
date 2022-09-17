@@ -529,10 +529,23 @@ RC ExecuteStage::do_update(SQLStageEvent* sql_event) {
     LOG_WARN("cannot find statment");
     return RC::GENERIC_ERROR;
   }
-  UodateStmt* update_stmt = (UpdateStmt*)stmt;
-  Table* table = update_stmt->table();
-  RC rc = table->update_record(nullptr, inser);
+  UpdateStmt* update_stmt = (UpdateStmt*)stmt;
 
+  TableScanOperator scan_operator(update_stmt->table());
+  PredicateOperator pred_oper(update_stmt->filter_stmt());
+  pred_oper.add_child(&scan_operator);
+  UpdateOperator update_oper(update_stmt);
+  update_oper.add_child(&pred_oper);
+
+
+  Table* table = update_stmt->table();
+  RC rc = table->update_record(nullptr, update_stmt->filter_stmt());
+  if (rc == RC::SUCCESS) {
+    session_event->set_response("SUCCESS\n");
+  } else {
+    session_event->set_response("FAILURE\n");
+  }
+  return rc;
 }
 
 RC ExecuteStage::do_delete(SQLStageEvent* sql_event) {

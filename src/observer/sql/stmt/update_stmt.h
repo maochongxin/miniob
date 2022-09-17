@@ -22,7 +22,7 @@ class Table;
 class UpdateStmt : public Stmt {
  public:
   UpdateStmt() = default;
-  UpdateStmt(Table* table, Value* values, int value_amount);
+  UpdateStmt(Table* table, Value* values, int value_amount, FilterStmt* filter_stmtß);
 
  public:
   static RC create(Db* db, const Updates& update_sql, Stmt*& stmt);
@@ -38,8 +38,17 @@ class UpdateStmt : public Stmt {
     return value_amount_;
   }
 
+  FilterStmt* filter_stmt() const {
+    return filter_stmt_;
+  }
+
+  StmtType type() const override {
+    return StmtType::UPDATE;
+  }
+
  private:
   Table* table_ = nullptr;
   Value* values_ = nullptr;
   int value_amount_ = 0;
+  FilterStmt* filter_stmt_ = nullptr;
 };

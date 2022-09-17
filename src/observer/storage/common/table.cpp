@@ -636,6 +636,14 @@ static RC record_reader_update_adapter(Record* record, void* context) {
   return record_updater.update_record(record);
 }
 
+RC Table::update_record(Trx* trx, ConditionFilter* filter, int* update_count) {
+  RecordUpdater updater(*this, trx);
+  RC rc = scan_record(trx, filter, -1, &updater, record_reader_update_adapter);
+  if (update_count) {
+    *update_count = updater.update_count();
+  }
+}
+
 RC Table::update_record(Trx* trx, const char* attribute_name, const Value* value, int condition_num,
     const Condition conditions[], int* updated_count) {
   RecordUpdater updater(*this, trx);

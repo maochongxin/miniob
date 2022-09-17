@@ -15,8 +15,12 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/update_stmt.h"
 
 // UPDATE table_name SET column1 = value1, column2 = value2, ... WHERE condition;
-UpdateStmt::UpdateStmt(Table* table, Value* values, int value_amount)
-    : table_(table), values_(values), value_amount_(value_amount) {
+UpdateStmt::UpdateStmt(Table* table, Value* values, int value_amount, FilterStmt* filter_stmt)
+    : table_(table), values_(values), value_amount_(value_amount), filter_stmt_(filter_stmt) {
+}
+
+RC FilterStmt* UpdateStmt::filter_stmt() {
+  return filter_stmt_;
 }
 
 RC UpdateStmt::create(Db* db, const Updates& update, Stmt*& stmt) {
@@ -40,7 +44,17 @@ RC UpdateStmt::create(Db* db, const Updates& update, Stmt*& stmt) {
     return RC::SCHEMA_FIELD_NOT_EXIST;
   }
 
+  std::unordered_map<std::string, Table*> table_map;
+  table_map.insert(std::pair<std::string, Table*>(std::string(table_name), table));
+
+  FilterStmt* filter_stmt = nullptr;
+  RC rc = FilterStmt::crete(db, table, &table_name, update.conditions, update.condition_name, filter_stmt);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to create filter statement. rc=%d:%s", rc, strrc(rc));
+    return rc;
+  }
+
   const Value& value = update.value;
-  stmt = new UpdateStmt(table, &value, 1);
+  stmt = new UpdateStmt(table, &value, 1, filter_stmt);
   return RC::SUCCESS;
 }
